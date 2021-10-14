@@ -1,7 +1,8 @@
 <template>
-
-<v-btn @click="getData">GetData</v-btn>
-
+    <div>
+        <v-btn @click="getData">Get Data</v-btn>
+        <v-btn @click="login">Connect with google</v-btn>
+    </div>
 </template>
 <script>
 export default {
@@ -11,6 +12,15 @@ export default {
             const snapshot = await ref.get();
             const doc = snapshot.data();
             console.log(doc.name);
+        },
+        async login(){
+            this.provider = new this.$fire.auth.GoogleAuthProvider()
+            this.$fire.auth().signInWithPopup(this.provider).then(result => {
+                this.$router.push('/')
+            }).catch(e => {
+                this.$snotify.error(e.message)
+                console.log(e)
+            })
         }
     }
     
