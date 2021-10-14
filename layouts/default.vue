@@ -1,5 +1,5 @@
 <template>
-  <v-app dark>
+  <v-app>
     <v-main>
       <v-container>
         <Nuxt />
@@ -9,6 +9,4 @@
 </template>
 
 <script>
-export default {
-}
 </script>
