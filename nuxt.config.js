@@ -38,7 +38,8 @@ export default {
 
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
-    // '@nuxtjs/firebase',
+    '@nuxtjs/firebase',
+    'cookie-universal-nuxt'
   ],
 
   firebase: {
