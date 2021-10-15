@@ -21,7 +21,8 @@
 
 <script>
 export default {
-  name: "auth"
+  name: "auth",
+  middleware: 'connect'
 }
 </script>
 
