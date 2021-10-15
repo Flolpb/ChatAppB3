@@ -58,7 +58,7 @@ export default {
         memoryOnly: false,
         enablePersistence: true,
         emulatorPort: undefined,
-      }, 
+      },
     }
  },
 
