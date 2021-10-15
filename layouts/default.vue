@@ -13,6 +13,10 @@ export default {
   mounted() {
     const user = this.$fireModule.auth().currentUser;
     if( user != null){
+      this.$cookies.set('uid', user.uid, {
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7
+      });
       const currentUser = {
         email: user.email,
         displayName: user.displayName,
@@ -20,6 +24,8 @@ export default {
         uid: user.uid
       }
       this.$store.dispatch(ACTIONS.LOGIN, currentUser);
+    }else{
+      this.$cookies.remove('uid');
     }
     
   }

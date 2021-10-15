@@ -48,12 +48,14 @@ export default {
         },
         async logout(){
             this.$fireModule.auth().signOut();
-             this.$store.dispatch(ACTIONS.LOGOUT);
+            this.$store.dispatch(ACTIONS.LOGOUT);
+            this.$cookies.remove('uid');
         },
         async getProfile(){
             console.log(this.$store.state.auth.user);
         }
-    }
+    },
+    middleware: 'disconnect'
     
 }
 </script>
