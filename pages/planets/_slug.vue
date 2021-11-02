@@ -7,10 +7,12 @@
         <div v-for="(m, i) in messages"
         :key="i"
         exact>
-            <div>msg: {{m[1].text}}</div>
+            <UserMessage :id="m[0]" :uid="m[1].userId" :text="m[1].text" :createdAt="m[1].createdAt" :isUser="false" v-if="m[1].userId != $store.state.auth.user.uid"/>
+            <UserMessage :id="m[0]" :uid="m[1].userId" :text="m[1].text" :createdAt="m[1].createdAt" :isUser="true" v-else />
+            <div style="height: 2rem;"></div>
         </div>
 
-        <v-form ref="form" v-model="valid" lazy-validation>
+        <v-form ref="form" lazy-validation>
             <v-text-field
                 v-model="message.text"
                 label="Message"
@@ -25,6 +27,8 @@
 </template>
 
 <script>
+
+import { UserMessage } from '../../components/UserMessage'
 export default {
 
     data: () => ({
@@ -33,15 +37,43 @@ export default {
             name: null,
             theme: null,
         },
-        messages: [],
         message: {
             text: "",
             userId: "",
             planetId: "",
             createdAt: '',
         },
+        messages: []
     }),
     middleware: 'disconnect',
+    mounted: () => {
+        const messagesRef = this.$fire.firestore.collection('messages');
+        const query = messagesRef.orderBy("createdAt");
+        query.onSnapshot((querySnapshot) => {
+            let i = this.messages.length;
+            querySnapshot.forEach((doc) => {
+                const docData = doc.data();
+                if(this.messages.length != 0){
+                    const id = this.messages.find((m) => {
+                        return m[0] == doc.id;
+                    });
+                    if(id == undefined){
+                        this.messages.push([]);
+                        if(this.messages[i] != undefined){
+                            this.messages[i].push(doc.id);
+                            this.messages[i].push(docData);
+                        }
+                        i++;
+                    }
+                }else{
+                    this.messages.push([]);
+                    this.messages[i].push(doc.id);
+                    this.messages[i].push(docData);
+                    i++;
+                }
+        });
+    });
+    },
     methods: {
         async getPlanet(){
             const ref = await this.$fire.firestore.collection("planets").doc(this.planet.id);
@@ -57,39 +89,6 @@ export default {
                 this.$router.push('/');
             }
         },
-        async getMessages(){
-            const messagesRef = await this.$fire.firestore.collection('messages');
-            const query = messagesRef.orderBy("createdAt");
-            query.get().then((snap) => {
-                console.log(this.messages.length);
-                let i = 0;
-                if(this.messages.length != 0){
-                    i = this.messages.length;
-                }
-                snap.forEach((doc) => {
-                    const docData = doc.data();
-                    if(docData.planetId == this.planet.id){
-                        if(this.messages.length != 0){
-                            const id = this.messages.find((m) => {
-                                m[0] == doc.id;
-                            });
-                            if(id == undefined){
-                                this.messages.push([]);
-                                this.messages[i].push(doc.id);
-                                this.messages[i].push(docData);
-                            }
-                        }else{
-                            this.messages.push([]);
-                            this.messages[i].push(doc.id);
-                            this.messages[i].push(docData);
-                        }
-                        i++;
-                        
-                    }
-                })
-            });
-
-        },
         async sendMessage(){
             const messageRef = await this.$fire.firestore.collection("messages").doc();
             await messageRef.set({
@@ -99,44 +98,54 @@ export default {
                 planetId: this.message.planetId,
                 createdAt: this.$fireModule.firestore.FieldValue.serverTimestamp(),
             });
+            this.message = {
+                text: "",
+                createdAt: "",
+            }
 
+        },
+        getUser(id){
+            const userRef = this.$fire.firestore.collection("users").doc(id);
+            let user = "";
+            userRef.get().then((snap) => {
+                user = snap.data();
+            });
+            return user.displayName;
         }
     },
     async mounted(){
         this.planet.id = this.$route.params.slug;
         await this.getPlanet();
-        await this.getMessages();
         this.message.userId = this.$store.state.auth.user.uid;
     },
-    async asyncData({$fire, messages, planet}) {
-        const messagesRef = await $fire.firestore.collection('messages');
+    async fetch() {
+        const messagesRef = await this.$fire.firestore.collection('messages');
         const query = messagesRef.orderBy("createdAt");
         query.onSnapshot((querySnapshot) => {
-            let i = 0;
-            if(messages.length != 0){
-                i = messages.length;
-            }
+            let i = this.messages.length;
             querySnapshot.forEach((doc) => {
                 const docData = doc.data();
-                if(docData.planetId == planet.id){
-                    if(messages.length != 0){
-                        const id = messages.find((m) => {
-                            m[0] == doc.id;
-                        });
-                        if(id == undefined){
-                            messages.push([]);
-                            messages[i].push(doc.id);
-                            messages[i].push(docData);
+                if(this.messages.length != 0){
+                    const id = this.messages.find((m) => {
+                        return m[0] == doc.id;
+                    });
+                    if(id == undefined){
+                        this.messages.push([]);
+                        if(this.messages[i] != undefined){
+                            this.messages[i].push(doc.id);
+                            this.messages[i].push(docData);
                         }
-                    }else{
-                        messages.push([]);
-                        messages[i].push(doc.id);
-                        messages[i].push(docData);
+                        i++;
                     }
+                }else{
+                    this.messages.push([]);
+                    this.messages[i].push(doc.id);
+                    this.messages[i].push(docData);
                     i++;
-            };
+                }
         });
     });
     },
+    watchQuery: true
 }
 </script>
