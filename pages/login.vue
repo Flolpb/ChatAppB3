@@ -48,12 +48,12 @@ export default {
             photoURL: result.user.photoURL,
             uid: result.user.uid
           };
-          const userRef = await this.$fire.firestore.collection("users").doc(newUser.uid);
-            await userRef.set({
-                displayName: newUser.displayName,
-                email: newUser.email,
-                photoURL: newUser.photoURL,
-            });
+          const userRef = this.$fire.firestore.collection("users").doc(newUser.uid);
+          userRef.set({
+              displayName: newUser.displayName,
+              email: newUser.email,
+              photoURL: newUser.photoURL,
+          });
           this.$store.dispatch(ACTIONS.LOGIN, newUser).then(() => {
             this.$cookies.set('uid', newUser.uid, {
               path: '/',
