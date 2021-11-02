@@ -43,6 +43,7 @@
   import CustomTitle from "../../components/CustomTitle";
   export default {
     components: {CustomTitle, CustomButton},
+    middleware: 'disconnect',
     data: () => ({
           valid: true,
           planetRef: null,
@@ -71,7 +72,6 @@
             this.valid = true;
           }
       },
-      middleware: 'disconnect',
       mounted(){
           this.planetRef = this.$fire.firestore.collection("planets").doc();
       }

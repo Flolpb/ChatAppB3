@@ -3,7 +3,7 @@
         <div>Name: {{planet.name}}</div>
         <div>Theme: {{planet.theme}}</div>
         <div id="content">
-            
+
             <div id="scrollableContent">
                 <div v-for="(m, i) in messages"
                 :key="i"
