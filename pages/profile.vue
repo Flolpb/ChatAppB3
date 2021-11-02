@@ -2,7 +2,6 @@
     <div>
         <v-btn @click="getData">Get Data</v-btn>
         <v-btn @click="getProfile">Get Profile</v-btn>
-        <v-btn outlined fab @click="login" color="#4285F4"><v-icon>fab fa-google</v-icon></v-btn>
         <v-btn outlined fab @click="logout" color="#4285F4">logout</v-btn>
 
         <div>
