@@ -1,16 +1,21 @@
 <template>
     <div>
-        <div>Id: {{planet.id}}</div>
         <div>Name: {{planet.name}}</div>
         <div>Theme: {{planet.theme}}</div>
-
-        <div v-for="(m, i) in messages"
-        :key="i"
-        exact>
-            <UserMessage :id="m[0]" :uid="m[1].userId" :text="m[1].text" :createdAt="m[1].createdAt" :isUser="false" v-if="m[1].userId != $store.state.auth.user.uid"/>
-            <UserMessage :id="m[0]" :uid="m[1].userId" :text="m[1].text" :createdAt="m[1].createdAt" :isUser="true" v-else />
-            <div style="height: 2rem;"></div>
+        <div id="content">
+            
+            <div id="scrollableContent">
+                <div v-for="(m, i) in messages"
+                :key="i"
+                exact>
+                    <UserMessage :id="m[0]" :uid="m[1].userId" :text="m[1].text" :createdAt="m[1].createdAt" :isUser="false" v-if="m[1].userId == $store.state.auth.user.uid"/>
+                    <UserMessage :id="m[0]" :uid="m[1].userId" :text="m[1].text" :createdAt="m[1].createdAt" :isUser="true" v-else />
+                    <div style="height: 1rem;"></div>
+                </div>
+                <div id="toScroll"></div>
+            </div>
         </div>
+
 
         <v-form ref="form" lazy-validation>
             <v-text-field
@@ -101,7 +106,8 @@ export default {
             this.message = {
                 text: "",
                 createdAt: "",
-            }
+            },
+            this.scrollToBottom();
 
         },
         getUser(id){
@@ -111,12 +117,20 @@ export default {
                 user = snap.data();
             });
             return user.displayName;
+        },
+        scrollToBottom() {
+
+            const el = this.$el.querySelector("#toScroll")
+            if (el) {
+                el.scrollIntoView({block: "end", behavior: "smooth"});
+            }
         }
     },
     async mounted(){
         this.planet.id = this.$route.params.slug;
         await this.getPlanet();
         this.message.userId = this.$store.state.auth.user.uid;
+        setTimeout(this.scrollToBottom(), 4000);
     },
     async fetch() {
         const messagesRef = await this.$fire.firestore.collection('messages');
@@ -132,6 +146,7 @@ export default {
                     if(id == undefined){
                         this.messages.push([]);
                         if(this.messages[i] != undefined){
+                            console.log("test");
                             this.messages[i].push(doc.id);
                             this.messages[i].push(docData);
                         }
@@ -149,3 +164,15 @@ export default {
     watchQuery: true
 }
 </script>
+
+<style scoped lang="scss">
+    #scrollableContent{
+        height: 100%;
+        margin: 0em;
+        overflow-y: auto;
+    }
+
+    #content{
+        height: 80vh;
+    }
+</style>

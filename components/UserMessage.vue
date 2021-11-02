@@ -7,7 +7,7 @@
             {{text}}
           </div>
         </div>
-        <div>{{created}}</div>
+        <div>{{time}}</div>
       </div>
     </div>
 </template>
@@ -47,15 +47,18 @@ export default {
         const doc = snapshot.data();
         
         this.username = doc.displayName;
-        this.created = new Date(this.createdAt.seconds);
-        this.hours = this.created.getHours();
-        this.minutes = this.created.getMinutes();
-        this.seconds = this.created.seconds();
-        this.time = this.hours +":"+ this.minutes + ":" + this.seconds;
+        if(this.createdAt != null){  
+          this.created = new Date(this.createdAt.seconds);
+          this.hours = this.created.getHours();
+          this.minutes = this.created.getMinutes();
+          this.seconds = this.created.getSeconds();
+          this.time = this.hours +":"+ this.minutes + ":" + this.seconds;
+        }
       } 
     },
     async mounted () {
       await this.getData();
+
     },
 
 }
