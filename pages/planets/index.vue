@@ -1,8 +1,4 @@
 <template>
-<<<<<<< HEAD:pages/auth.vue
-    <h1> Connexion </h1>
-</template>
-=======
   <h1>Liste des planètes</h1>
 </template>
 
@@ -15,4 +11,3 @@ export default {
 <style scoped>
 
 </style>
->>>>>>> main:pages/planets/index.vue
