@@ -11,7 +11,7 @@ export default {
 
 <style scoped lang="scss">
   #button {
-    background: #272753;
+    background: $main-purple;
     padding: 1em;
     font-family: 'HelveticaNowText-Medium', sans-serif;
     font-size: 1.5rem;
@@ -19,7 +19,7 @@ export default {
     transition: 0.3s;
   }
   #button:hover:enabled {
-    background: rgba(39,39,83,0.8);
+    background: $main-purple-on-hover;
     transform: translateY(-5%);
   }
   #button:disabled {

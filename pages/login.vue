@@ -59,10 +59,12 @@ export default {
               path: '/',
               maxAge: 60 * 60 * 24 * 7
             });
-            this.spinner = false;
-            this.$router.push('/profile');
+            this.$router.push('/planets');
+
+            // Ligne commentée car on ne réinitialise pas le spinner au moment de la redirection (plus propre visuellement)
+            //this.spinner = false;
           });
-          
+
         });
       } catch (e) {
         this.spinner = false;

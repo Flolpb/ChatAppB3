@@ -31,7 +31,12 @@
             solo
           ></v-text-field>
 
-          <CustomButton :title="'Créer une nouvelle planète'" :button-click="createPlanet" :disabled="!valid"/>
+          <v-progress-circular
+            v-if="spinner"
+            indeterminate
+            color="#272753"
+          ></v-progress-circular>
+          <CustomButton v-else :title="'Créer une nouvelle planète'" :button-click="createPlanet" :disabled="!valid"/>
         </v-form>
       </v-col>
     </v-row>
@@ -45,26 +50,35 @@
     components: {CustomTitle, CustomButton},
     middleware: 'disconnect',
     data: () => ({
-          valid: true,
-          planetRef: null,
-          planet: {
-            name: "",
-            nameRules: [(v) => !!v || "Le nom est requis"],
-            theme: "",
-            themeRules: [(v) => !!v || "Le thème est requis"],
-          },
+      spinner: false,
+      valid: true,
+      planetRef: null,
+      planet: {
+        name: "",
+        nameRules: [(v) => !!v || "Le nom est requis"],
+        theme: "",
+        themeRules: [(v) => !!v || "Le thème est requis"],
+      },
       }),
       methods: {
           async createPlanet(){
-            this.valid = this.$refs.form.validate();
-            if (this.valid) {
-              await this.planetRef.set({
-                id: this.planetRef.id,
-                name: this.planet.name,
-                theme: this.planet.theme
-              }).then(r => {
-                this.$router.push("/planets/" + this.planetRef.id);
-              });
+            this.spinner = true;
+            try {
+              this.valid = this.$refs.form.validate();
+              if (this.valid) {
+                await this.planetRef.set({
+                  id: this.planetRef.id,
+                  name: this.planet.name,
+                  theme: this.planet.theme
+                }).then(r => {
+                  this.$router.push("/planets/" + this.planetRef.id);
+
+                  // Ligne commentée car on ne réinitialise pas le spinner au moment de la redirection (plus propre visuellement)
+                  //this.spinner = false;
+                });
+              }
+            } catch (e) {
+             this.spinner = false;
             }
           },
           resetValidation() {
