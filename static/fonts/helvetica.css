@@ -1,0 +1,49 @@
+@font-face {
+  font-family: 'HelveticaNowText-Thin';
+  src: url(Helvetica/HelveticaNowText-Thin.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'HelveticaNowText-ThinItalic';
+  src: url(Helvetica/HelveticaNowText-ThinItalic.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'HelveticaNowText-Light';
+  src: url(Helvetica/HelveticaNowText-Light.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'HelveticaNowText-LightItalic';
+  src: url(Helvetica/HelveticaNowText-LightItalic.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'HelveticaNowText-Medium';
+  src: url(Helvetica/HelveticaNowText-Medium.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'HelveticaNowText-MediumItalic';
+  src: url(Helvetica/HelveticaNowText-MediumItalic.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'HelveticaNowText-Bold';
+  src: url(Helvetica/HelveticaNowText-Bold.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'HelveticaNowText-BoldItalic';
+  src: url(Helvetica/HelveticaNowText-BoldItalic.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'HelveticaNowText-Black';
+  src: url(Helvetica/HelveticaNowText-Black.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'HelveticaNowText-BlackItalic';
+  src: url(Helvetica/HelveticaNowText-BlackItalic.woff2) format('woff2');
+}

@@ -21,6 +21,7 @@ export default {
 
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: [
+    '~/static/fonts/helvetica.css'
   ],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
@@ -38,8 +39,28 @@ export default {
 
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
-    // '@nuxtjs/firebase',
+    '@nuxtjs/firebase',
+    'cookie-universal-nuxt'
   ],
+
+  firebase: {
+    config: {
+      apiKey: "AIzaSyAgT-ZtZ_YI1EUakpxjZNvCKnKrXCWBggU",
+      authDomain: "chatappnuxtjs.firebaseapp.com",
+      projectId: "chatappnuxtjs",
+      storageBucket: "chatappnuxtjs.appspot.com",
+      messagingSenderId: "921789699071",
+      appId: "1:921789699071:web:b3c346e8a38b1369e84dca"
+    },
+    services: {
+      auth: true,
+      firestore: {
+        memoryOnly: false,
+        enablePersistence: true,
+        emulatorPort: undefined,
+      },
+    }
+ },
 
   // Vuetify module configuration: https://go.nuxtjs.dev/config-vuetify
   vuetify: {
