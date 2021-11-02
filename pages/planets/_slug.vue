@@ -3,8 +3,8 @@
         <div>Name: {{planet.name}}</div>
         <div>Theme: {{planet.theme}}</div>
         <div id="content">
-
-            <div id="scrollableContent">
+            
+            <div id="scrollableContent" v-if="messages.length">
                 <div v-for="(m, i) in messages"
                 :key="i"
                 exact>
@@ -51,34 +51,6 @@ export default {
         messages: []
     }),
     middleware: 'disconnect',
-    mounted: () => {
-        const messagesRef = this.$fire.firestore.collection('messages');
-        const query = messagesRef.orderBy("createdAt");
-        query.onSnapshot((querySnapshot) => {
-            let i = this.messages.length;
-            querySnapshot.forEach((doc) => {
-                const docData = doc.data();
-                if(this.messages.length != 0){
-                    const id = this.messages.find((m) => {
-                        return m[0] == doc.id;
-                    });
-                    if(id == undefined){
-                        this.messages.push([]);
-                        if(this.messages[i] != undefined){
-                            this.messages[i].push(doc.id);
-                            this.messages[i].push(docData);
-                        }
-                        i++;
-                    }
-                }else{
-                    this.messages.push([]);
-                    this.messages[i].push(doc.id);
-                    this.messages[i].push(docData);
-                    i++;
-                }
-        });
-    });
-    },
     methods: {
         async getPlanet(){
             const ref = await this.$fire.firestore.collection("planets").doc(this.planet.id);
@@ -93,6 +65,34 @@ export default {
             else{
                 this.$router.push('/');
             }
+        },
+        async getMessages(){
+             const messagesRef = await this.$fire.firestore.collection('messages');
+            const query = messagesRef.orderBy("createdAt");
+            query.onSnapshot((querySnapshot) => {
+                let i = this.messages.length;
+                querySnapshot.forEach((doc) => {
+                    const docData = doc.data();
+                    if(this.messages.length != 0){
+                        const id = this.messages.find((m) => {
+                            return m[0] == doc.id;
+                        });
+                        if(id == undefined){
+                            this.messages.push([]);
+                            if(this.messages[i] != undefined){
+                                this.messages[i].push(doc.id);
+                                this.messages[i].push(docData);
+                            }
+                            i++;
+                        }
+                    }else{
+                        this.messages.push([]);
+                        this.messages[i].push(doc.id);
+                        this.messages[i].push(docData);
+                        i++;
+                    }
+                });
+            });
         },
         async sendMessage(){
             const messageRef = await this.$fire.firestore.collection("messages").doc();
@@ -129,6 +129,7 @@ export default {
     async mounted(){
         this.planet.id = this.$route.params.slug;
         await this.getPlanet();
+        await this.getMessages();
         this.message.userId = this.$store.state.auth.user.uid;
         setTimeout(this.scrollToBottom(), 4000);
     },
@@ -146,7 +147,6 @@ export default {
                     if(id == undefined){
                         this.messages.push([]);
                         if(this.messages[i] != undefined){
-                            console.log("test");
                             this.messages[i].push(doc.id);
                             this.messages[i].push(docData);
                         }
