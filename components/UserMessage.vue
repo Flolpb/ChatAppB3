@@ -1,5 +1,21 @@
 <template>
-    <div v-if="isUser">{{username}} : {{text}}</div>
+    <div v-if="isUser" class="d-flex justify-start">
+      <div>
+        <img style="border-radius: 50%; height: 2rem;" :src="photoUrl" />
+      </div>
+      <div>
+        <div class="message">
+          <div class="text">
+            {{text}}
+          </div>
+        </div>
+        <div class="d-flex justify-space-between">
+          <div>{{username}}</div>
+          <div></div>
+          <div>{{time}}</div>
+        </div>
+      </div>
+    </div>
     <div class="d-flex justify-end" v-else>
       <div>
         <div class="message">
@@ -8,6 +24,9 @@
           </div>
         </div>
         <div>{{time}}</div>
+      </div>
+      <div>
+        <img style="border-radius: 50%; height: 2rem;" :src="$store.state.auth.user.photoURL" />
       </div>
     </div>
 </template>
@@ -22,6 +41,7 @@ export default {
       seconds: null,
       time: null,
       date: null,
+      photoUrl: null,
 
     }),
     props: [
@@ -45,15 +65,18 @@ export default {
         const userRef = await this.$fire.firestore.collection("users").doc(this.uid);
         const snapshot = await userRef.get();
         const doc = snapshot.data();
-        
-        this.username = doc.displayName;
-        if(this.createdAt != null){  
-          this.created = new Date(this.createdAt.seconds);
-          this.hours = this.created.getHours();
-          this.minutes = this.created.getMinutes();
-          this.seconds = this.created.getSeconds();
-          this.time = this.hours +":"+ this.minutes + ":" + this.seconds;
+        if(doc != null){
+          this.username = doc.displayName;
+          this.photoUrl = doc.photoURL;
+          if(this.createdAt != null){  
+            this.created = new Date(this.createdAt.seconds);
+            this.hours = this.created.getHours();
+            this.minutes = this.created.getMinutes();
+            this.seconds = this.created.getSeconds();
+            this.time = this.hours +":"+ this.minutes + ":" + this.seconds;
+          }
         }
+        
       } 
     },
     async mounted () {
