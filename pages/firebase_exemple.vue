@@ -28,7 +28,6 @@ export default {
             console.log(this.$store.state.localStorage.users);
         },
         async login(){
-            console.log(this.$fire);
             this.provider = new this.$fireModule.auth.GoogleAuthProvider();
             this.$fireModule.auth().signInWithPopup(this.provider).then(result => {
                 const newUser = {
@@ -43,8 +42,14 @@ export default {
                         maxAge: 60 * 60 * 24 * 7
                     });
                 });
-                console.log(result.user.email);
+                const us = this.$fire.firestore.collection("users").doc(newUser.uid);
+                us.set({
+                    displayName: newUser.displayName,
+                    email: newUser.email,
+                    photoURL: newUser.photoURL,
+                })
             });
+            
         },
         async logout(){
             this.$fireModule.auth().signOut();
