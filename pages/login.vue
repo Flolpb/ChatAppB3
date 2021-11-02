@@ -11,7 +11,12 @@
             <p id="text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ducimus iusto laboriosam magnam maiores, placeat quasi quis quos rem repellat repellendus? Dolorem explicabo optio placeat provident. </p>
           </v-col>
           <v-col cols="12" align="center">
-            <CustomButton :title="'Connexion avec Google'" :button-click="auth" />
+            <v-progress-circular
+              v-if="spinner"
+              indeterminate
+              color="#272753"
+            ></v-progress-circular>
+            <CustomButton v-else :title="'Connexion avec Google'" :button-click="login" />
           </v-col>
         </v-row>
       </v-col>
@@ -22,14 +27,40 @@
 <script>
 import CustomButton from "../components/CustomButton";
 import CustomTitle from "../components/CustomTitle";
+import {ACTIONS} from "../store/auth";
+
 export default {
   name: "auth",
   components: {CustomTitle, CustomButton},
   middleware: 'connect',
+  data: () => ({
+    spinner: false,
+  }),
   methods: {
-    auth: () => {
-      console.log("test")
-    }
+    async login(){
+      this.spinner = true;
+      try {
+        this.provider = new this.$fireModule.auth.GoogleAuthProvider();
+        this.$fireModule.auth().signInWithPopup(this.provider).then(result => {
+          const newUser = {
+            email: result.user.email,
+            displayName: result.user.displayName,
+            photoURL: result.user.photoURL,
+            uid: result.user.uid
+          };
+          this.$store.dispatch(ACTIONS.LOGIN, newUser).then(() => {
+            this.$cookies.set('uid', newUser.uid, {
+              path: '/',
+              maxAge: 60 * 60 * 24 * 7
+            });
+            this.spinner = false;
+            this.$router.push('/profile');
+          });
+        });
+      } catch (e) {
+        this.spinner = false;
+      }
+    },
   }
 }
 </script>
