@@ -2,6 +2,7 @@
   <v-card
     elevation="12"
     width="200"
+    style="position:fixed; left: 1em; top: 1em"
   >
     <v-navigation-drawer
       color="deep-purple lighten-5"
