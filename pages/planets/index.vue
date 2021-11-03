@@ -1,7 +1,8 @@
 <template>
   <div class="text-center">
     <SidebarMenu :items="sidebarItems" />
-    <canvas class="text-center" :width="canvasData.width" :height="canvasData.height" ref="canvas" id="canvas" style="overflow-x: hidden;  "></canvas>
+<!--    <canvas class="text-center" :width="canvasData.width" :height="canvasData.height" ref="canvas" id="canvas" style="overflow-x: hidden;  "></canvas>-->
+    <canvas class="text-center"  ref="canvas" id="canvas" style="overflow-x: hidden;  "></canvas>
   </div>
 </template>
 
@@ -26,12 +27,12 @@ export default {
     this.RING_RADIUS_Y = 15;
     this.CANVAS_MARGIN_X = 200;
 
-    if (process.browser) {
-      this.canvasData = {
-        width: window.innerWidth - this.CANVAS_MARGIN_X,
-        height: window.innerHeight,
-      };
-    }
+    // if (process.browser) {
+    //   this.canvasData = {
+    //     width: window.innerWidth - this.CANVAS_MARGIN_X,
+    //     height: window.innerHeight,
+    //   };
+    // }
   },
   async mounted() {
     // On remplit le tableau quand le composant est initialisé, sinon les appels de fonction depuis les composants enfants
@@ -43,7 +44,8 @@ export default {
       { title: 'Se déconnecter', click: () => this.logout(), class_color: 'red--text'}
     ]
     this.planets = await this.getPlanets();
-    this.drawPlanets();
+    this.updateCanvasHeight();
+
   },
   methods: {
     async logout() {
@@ -62,6 +64,21 @@ export default {
     random(min, max) {
       return Math.floor(Math.random() * (max - min + 1) + min)
     },
+    // Va adapter la taille du canvas en fonction du nombre de planètes avant de commencer le dessin
+    updateCanvasHeight() {
+      if (process.browser) {
+        this.canvasData = {
+          width: window.innerWidth - this.CANVAS_MARGIN_X,
+          // (Nb de planètes * Aire pour une planète (104 000 px²)) / (largeur de l'écran - marge du canvas)
+          height: (this.planets.length * 117000) / (window.innerWidth - this.CANVAS_MARGIN_X)
+        }
+        let ctx = this.$refs.canvas.getContext('2d');
+        ctx.canvas.width = this.canvasData.width
+        ctx.canvas.height = this.canvasData.height
+        console.log(this.canvasData)
+      }
+      this.drawPlanets();
+    },
     // Fonction de dessin de toutes les planètes
     drawPlanets() {
       // Flush des ellipses (si on recommence le dessin du canvas)
@@ -69,7 +86,7 @@ export default {
       // Variable de limite pour éviter le crash si le canvas n'a pas assez de place
       let limit = 0;
       // On limite à 10000 essais de génération de coordonnées
-      for (let i = 0; i < 500 && limit < 10000; i++) {
+      for (let i = 0; i < this.planets.length && limit < 10000; i++) {
         // On crée une objet avec des coordonnées aléatoire
         let newEllipse = {
           // id: this.planets[i].id,
@@ -122,11 +139,6 @@ export default {
       ctx.ellipse(x, y, this.PLANET_RADIUS, this.PLANET_RADIUS, 0,  0, 2 * Math.PI);
       ctx.fill();
       ctx.closePath();
-
-      this.ellipses.push({
-        x: x,
-        y: y,
-      })
     },
     // drawRandomPeculiarity(x, y) {
     //   let ctx = this.$refs.canvas.getContext('2d');
