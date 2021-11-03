@@ -11,7 +11,7 @@
         </div>
         <div class="d-flex justify-space-between">
           <div>{{username}}</div>
-          <div></div>
+          <div style="width: 2rem;"></div>
           <div>{{time}} {{date}}</div>
         </div>
       </div>
