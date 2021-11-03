@@ -1,7 +1,7 @@
 <template>
     <div v-if="isUser" class="d-flex justify-start">
       <div>
-        <img style="border-radius: 50%; height: 2rem;" :src="photoUrl" />
+        <img style="margin-left: 4px; margin-right: 4px; margin-top: 4px;border-radius: 50%; height: 2rem;" :src="photoUrl" />
       </div>
       <div>
         <div class="message">
@@ -11,8 +11,8 @@
         </div>
         <div class="d-flex justify-space-between">
           <div>{{username}}</div>
-          <div></div>
-          <div>{{time}}</div>
+          <div style="width: 2rem;"></div>
+          <div>{{time}} {{date}}</div>
         </div>
       </div>
     </div>
@@ -23,10 +23,12 @@
             {{text}}
           </div>
         </div>
-        <div>{{time}}</div>
+        <div class="d-flex justify-end">
+          <div>{{time}} {{date}}</div>
+        </div>
       </div>
       <div>
-        <img style="border-radius: 50%; height: 2rem;" :src="$store.state.auth.user.photoURL" />
+        <img style="border-radius: 50%; height: 2rem; margin-left: 4px; margin-right: 4px;margin-top: 4px;" :src="$store.state.auth.user.photoURL" />
       </div>
     </div>
 </template>
@@ -41,6 +43,7 @@ export default {
       seconds: null,
       time: null,
       date: null,
+      month: null,
       photoUrl: null,
 
     }),
@@ -68,12 +71,32 @@ export default {
         if(doc != null){
           this.username = doc.displayName;
           this.photoUrl = doc.photoURL;
-          if(this.createdAt != null){  
-            this.created = new Date(this.createdAt.seconds);
+          if(this.createdAt != null){
+            this.created = new Date(this.createdAt.seconds * 1000);
             this.hours = this.created.getHours();
+            if(this.hours < 10){
+              this.hours = "0" + this.hours
+            }
             this.minutes = this.created.getMinutes();
+            if(this.minutes < 10){
+              this.minutes = "0" + this.minutes
+            }
             this.seconds = this.created.getSeconds();
-            this.time = this.hours +":"+ this.minutes + ":" + this.seconds;
+            if(this.seconds < 10){
+              this.seconds = "0" + this.seconds
+            }
+            this.time = this.hours + ":"+ this.minutes + ":" + this.seconds;
+            this.date = this.created.getDate();
+            if(this.date < 10){
+              this.date = "0" + this.date
+            }
+            this.month = this.created.getMonth();
+            this.month++;
+            if(this.month < 10){
+              this.month = "0" + this.month
+            }
+
+            this.date += "/" + this.month;
           }
         }
         
@@ -81,7 +104,6 @@ export default {
     },
     async mounted () {
       await this.getData();
-
     },
 
 }
@@ -94,7 +116,6 @@ export default {
   }
 
   .text{
-    
     color: black;
     padding: 0.5rem 2rem 0.5rem 2rem;
   }
