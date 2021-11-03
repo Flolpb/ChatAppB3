@@ -45,10 +45,8 @@ export default {
       date: null,
       month: null,
       photoUrl: null,
-
     }),
     props: [
-        "id",
         "uid",
         "text",
         "isUser",

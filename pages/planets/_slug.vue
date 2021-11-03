@@ -1,5 +1,8 @@
 <template>
-    <div class="d-flex justify-space-between">
+<div>
+    <p v-if="$fetchState.pending">Fetching Planet...</p>
+    <p v-else-if="$fetchState.error">An error occurred :(</p>
+    <div v-else class="d-flex justify-space-between">
         <div class="chat">
             <div class="titre">{{planet.name}}</div>
             <div class="sous-titre">{{planet.theme}}</div>
@@ -8,8 +11,8 @@
                     <li v-for="(m, i) in messages"
                     :key="i"
                     exact>
-                        <UserMessage :id="m[0]" :uid="m[1].userId" :text="m[1].text" :createdAt="m[1].createdAt" :isUser="false" v-if="m[1].userId == $store.state.auth.user.uid"/>
-                        <UserMessage :id="m[0]" :uid="m[1].userId" :text="m[1].text" :createdAt="m[1].createdAt" :isUser="true" v-else />
+                        <UserMessage :uid="m.userId" :text="m.text" :createdAt="m.createdAt" :isUser="false" v-if="m.userId == $store.state.auth.user.uid"/>
+                        <UserMessage :uid="m.userId" :text="m.text" :createdAt="m.createdAt" :isUser="true" v-else />
                         <div style="height: 1rem;"></div>
                     </li>
                 </ul>
@@ -42,6 +45,8 @@
             </div>
         </div>
     </div>
+</div>
+    
 </template>
 
 <script>
@@ -60,53 +65,66 @@ export default {
             createdAt: '',
         },
         messages: [],
-        users: []
+        users: [],
+        planetRef: null,
     }),
     middleware: 'disconnect',
     methods: {
         async getPlanet(){
-            const ref = await this.$fire.firestore.collection("planets").doc(this.planet.id);
-            const snapshot = await ref.get();
+            this.planetRef = await this.$fire.firestore.collection("planets").doc(this.$route.params.slug);
+            const snapshot = await this.planetRef.get();
             const doc = snapshot.data();
             if(doc != null){
                 this.planet.name = doc.name;
                 this.planet.theme = doc.theme;
                 this.message.planetId = this.planet.id;
-                document.title = this.planet.name + " - " + this.planet.theme;
+                if(document != null){
+                    document.title = this.planet.name + " - " + this.planet.theme;
+                }
+                          
             }
             else{
                 this.$router.push('/');
             }
         },
         async getMessages(){
-             const messagesRef = await this.$fire.firestore.collection('messages');
-            const query = messagesRef.orderBy("createdAt");
-            query.onSnapshot((querySnapshot) => {
-                let i = this.messages.length;
-                querySnapshot.forEach((doc) => {
-                    const docData = doc.data();
-                    if(this.messages.length != 0){
-                        const id = this.messages.find((m) => {
-                            return m[0] == doc.id;
-                        });
-                        if(id == undefined){
-                            this.messages.push([]);
-                            if(this.messages[i] != undefined){
-                                this.messages[i].push(doc.id);
-                                this.messages[i].push(docData);
+            const planetRef = await this.$fire.firestore.collection("planets").doc(this.$route.params.slug);
+            const observer = planetRef.onSnapshot((doc) => {
+                const data = doc.data();
+                if(data != null){
+                    data.messages.sort(function(a,b){
+                        return new Date(b.createdAt) - new Date(a.createdAt);
+                    });
+                    let i = this.messages.length;
+                    data.messages.forEach((msg) => {
+                        if(i != 0){
+                            const id = this.messages.find((m) => {
+                                return m.id == msg.id;
+                            });
+                            if(id == undefined){
+                                this.messages.push(msg);
+                                i++;
                             }
+                        }else{
+                            this.messages.push(msg);
                             i++;
                         }
-                    }else{
-                        this.messages.push([]);
-                        this.messages[i].push(doc.id);
-                        this.messages[i].push(docData);
-                        i++;
-                    }
-                });
-            });
+                    })                
+                }
+            })
+            
         },
         async sendMessage(){
+            this.$fire.firestore.collection("planets").doc(this.$route.params.slug).update({
+                messages: this.$fireModule.firestore.FieldValue.arrayUnion({
+                    id: this.messages.length,
+                    text: this.message.text,
+                    userId: this.message.userId,
+                    planetId: this.message.planetId,
+                    createdAt: this.$fireModule.firestore.Timestamp.now(),
+                }),
+                lastMsg: this.message.text,
+            });
             const messageRef = await this.$fire.firestore.collection("messages").doc();
             await messageRef.set({
                 id: messageRef.id,
@@ -117,6 +135,7 @@ export default {
             });
             this.message.text = "";
             this.message.createdAt = "";
+
         },
         scrollToBottom() {
             if(this.$el){
@@ -128,33 +147,31 @@ export default {
         },
         async getUserConnected(){
             const usersStatus = await this.$fire.firestore.collection('usersStatut');
-            const snapshot = await usersStatus.where('planetId', '==', this.planet.id).get();
-            let i = 0;
-            console.log(snapshot);
-            snapshot.forEach((doc) => {
-                const docData = doc.data();
-                console.log(doc);
-                if(this.users.length != 0){
-                    const id = this.users.findIndex((u) => {
-                        return u[0] == doc.id;
-                    });
-                    if(id == -1){
-                        this.users.push([]);
-                        if(this.users[i] != undefined){
-                            this.users[i].push(doc.id);
-                            this.users[i].push(docData);
+            let i = this.users.length;
+            const observer = await usersStatus.where('planetId', '==', this.planet.id).onSnapshot((querySnap) => {
+                querySnap.forEach((doc) => {
+                    const docData = doc.data();
+                    if(this.users.length != 0){
+                        const id = this.users.findIndex((u) => {
+                            return u[0] == doc.id;
+                        });
+                        if(id == -1){
+                            this.users.push([]);
+                            if(this.users[i] != undefined){
+                                this.users[i].push(doc.id);
+                                this.users[i].push(docData);
+                            }
+                            i++;
+                        }else{
+                            this.users[id][1].connected = docData.connected;
                         }
-                        i++;
                     }else{
-                        console.log("test");
-                        this.users[id][1].connected = docData.connected;
+                        this.users.push([]);
+                        this.users[i].push(doc.id);
+                        this.users[i].push(docData);
+                        i++;
                     }
-                }else{
-                    this.users.push([]);
-                    this.users[i].push(doc.id);
-                    this.users[i].push(docData);
-                    i++;
-                }
+                });
             });
         },
         async addUserConnected(status){
@@ -194,7 +211,6 @@ export default {
             }
 
             document.title = this.planet.name + " - " + this.planet.theme;
-            this.getUserConnected();
         }
     },
     async mounted(){
@@ -209,38 +225,12 @@ export default {
     },
     updated(){
         setTimeout(() => {
-            this.scrollToBottom()
+            this.scrollToBottom();
         }, 500)
     },
-    
     async fetch() {
-        this.getUserConnected();
-        const messagesRef = await this.$fire.firestore.collection('messages');
-        const query = messagesRef.orderBy("createdAt");
-        query.onSnapshot((querySnapshot) => {
-            let i = this.messages.length;
-            querySnapshot.forEach((doc) => {
-                const docData = doc.data();
-                if(this.messages.length != 0){
-                    const id = this.messages.find((m) => {
-                        return m[0] == doc.id;
-                    });
-                    if(id == undefined){
-                        this.messages.push([]);
-                        if(this.messages[i] != undefined){
-                            this.messages[i].push(doc.id);
-                            this.messages[i].push(docData);
-                        }
-                        i++;
-                    }
-                }else{
-                    this.messages.push([]);
-                    this.messages[i].push(doc.id);
-                    this.messages[i].push(docData);
-                    i++;
-                }
-            });
-        });
+        await this.getMessages();
+        await this.getUserConnected();
     },
     watchQuery: true,
 }
