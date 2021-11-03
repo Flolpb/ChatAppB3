@@ -21,20 +21,12 @@ export default {
     RING_RADIUS_X: 0,
     RING_RADIUS_Y: 0,
   }),
-  created() {
+  async mounted() {
     this.PLANET_RADIUS = 80;
     this.RING_RADIUS_X = 120;
     this.RING_RADIUS_Y = 15;
     this.CANVAS_MARGIN_X = 200;
 
-    // if (process.browser) {
-    //   this.canvasData = {
-    //     width: window.innerWidth - this.CANVAS_MARGIN_X,
-    //     height: window.innerHeight,
-    //   };
-    // }
-  },
-  async mounted() {
     // On remplit le tableau quand le composant est initialisé, sinon les appels de fonction depuis les composants enfants
     // ne marche pas car les fonctions n'ont pas le temps de charger et de s'ajouter à la méthode click
     this.sidebarItems = [
@@ -46,6 +38,16 @@ export default {
     this.planets = await this.getPlanets();
     this.updateCanvasHeight();
 
+    // Ajout d'un évènement onClick sur le Canvas
+    this.$refs.canvas.addEventListener('click', (e) => {
+      let clickedPlanet = this.ellipses.find((ellipse) => {
+        return (e.offsetX <= ellipse.x + this.RING_RADIUS_X)
+          && (e.offsetX >= ellipse.x - this.RING_RADIUS_X)
+          && (e.offsetY >= ellipse.y - this.RING_RADIUS_X)
+          && (e.offsetY <= ellipse.y + this.RING_RADIUS_X)
+      });
+      clickedPlanet && (this.redirectToPlanet(clickedPlanet.id))
+    });
   },
   methods: {
     async logout() {
@@ -75,7 +77,6 @@ export default {
         let ctx = this.$refs.canvas.getContext('2d');
         ctx.canvas.width = this.canvasData.width
         ctx.canvas.height = this.canvasData.height
-        console.log(this.canvasData)
       }
       this.drawPlanets();
     },
@@ -89,7 +90,7 @@ export default {
       for (let i = 0; i < this.planets.length && limit < 10000; i++) {
         // On crée une objet avec des coordonnées aléatoire
         let newEllipse = {
-          // id: this.planets[i].id,
+          id: this.planets[i].id,
           x: this.random(this.RING_RADIUS_X, this.canvasData.width - this.RING_RADIUS_X),
           y: this.random(this.RING_RADIUS_X, this.canvasData.height - this.RING_RADIUS_X),
         };
