@@ -2,15 +2,6 @@
   <div>
     <SidebarMenu :items="sidebarItems" />
     <canvas :width="canvasData.width" :height="canvasData.height" ref="canvas" id="canvas" style="overflow-x: hidden;  "></canvas>
-<!--    <v-row v-for="planet in planets">-->
-<!--      <v-col cols="2">-->
-<!--        <SidebarMenu :items="sidebarItems" />-->
-<!--      </v-col>-->
-<!--      <v-col cols="10">-->
-<!--        <img class="image" src="/images/planets/saturn.png" alt="Image de planète" @click="redirectToPlanet(planet.id)">-->
-<!--        <p>{{ planet.name }}</p>-->
-<!--      </v-col>-->
-<!--    </v-row>-->
   </div>
 </template>
 
@@ -23,9 +14,6 @@ export default {
   data: () => ({
     sidebarItems: [],
     planets: [],
-    planetImages: [
-      'earth', 'jupiter', 'mars', 'mercury', 'neptune', 'pluto', 'saturn', 'uranus', 'venus'
-    ],
     canvasData: {}
   }),
   created() {
