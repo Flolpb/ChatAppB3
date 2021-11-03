@@ -20,12 +20,15 @@ export default {
     PLANET_RADIUS: 0,
     RING_RADIUS_X: 0,
     RING_RADIUS_Y: 0,
+    CANVAS_MARGIN_X: 0,
+    FPS: 0,
   }),
   async mounted() {
     this.PLANET_RADIUS = 80;
     this.RING_RADIUS_X = 120;
     this.RING_RADIUS_Y = 15;
     this.CANVAS_MARGIN_X = 200;
+    this.FPS = 60;
 
     // On remplit le tableau quand le composant est initialisé, sinon les appels de fonction depuis les composants enfants
     // ne marche pas car les fonctions n'ont pas le temps de charger et de s'ajouter à la méthode click
@@ -34,11 +37,11 @@ export default {
       { title: 'Amis', route:'/friends' },
       { title: 'Paramètres', route:'/parameter' },
       { title: 'Se déconnecter', click: () => this.logout(), class_color: 'red--text'}
-    ]
+    ];
     this.planets = await this.getPlanets();
     this.updateCanvasHeight();
 
-    // Ajout d'un évènement onClick sur le Canvas
+    // Ajout d'un évènement onClick sur le canvas pour entrer dans une planète
     this.$refs.canvas.addEventListener('click', (e) => {
       let clickedPlanet = this.ellipses.find((ellipse) => {
         return (e.offsetX <= ellipse.x + this.RING_RADIUS_X)
@@ -48,6 +51,9 @@ export default {
       });
       clickedPlanet && (this.redirectToPlanet(clickedPlanet.id))
     });
+  },
+  destroyed() {
+    clearInterval(this.cyclicRedraw)
   },
   methods: {
     async logout() {
@@ -66,7 +72,7 @@ export default {
     random(min, max) {
       return Math.floor(Math.random() * (max - min + 1) + min)
     },
-    // Va adapter la taille du canvas en fonction du nombre de planètes avant de commencer le dessin
+    // Adapte la taille du canvas en fonction du nombre de planètes avant de commencer le dessin
     updateCanvasHeight() {
       if (process.browser) {
         this.canvasData = {
@@ -78,7 +84,28 @@ export default {
         ctx.canvas.width = this.canvasData.width
         ctx.canvas.height = this.canvasData.height
       }
-      this.drawPlanets();
+      this.launchDrawing();
+    },
+    launchDrawing() {
+      let ctx = this.$refs.canvas.getContext('2d');
+      this.cyclicRedraw = setInterval(() => {
+        ctx.clearRect(0, 0, this.canvasData.width, this.canvasData.height);
+        if (!this.ellipses.length) {
+          this.drawPlanets();
+        } else {
+          this.ellipses.map((ellipse) => {
+            ellipse.rings = ellipse.rings.map((e) => {
+              // On ajoute une valeur à la rotation en fonction de la vitesse pour faire tourner les anneaux
+              return {
+                color: e.color,
+                rot: e.rot += e.celerity * 0.001,
+                lineWidth: e.lineWidth,
+                celerity: e.celerity,
+              }});
+            this.updatePlanet(ellipse);
+          });
+        }
+      }, 1000/this.FPS)
     },
     // Fonction de dessin de toutes les planètes
     drawPlanets() {
@@ -93,6 +120,7 @@ export default {
           id: this.planets[i].id,
           x: this.random(this.RING_RADIUS_X, this.canvasData.width - this.RING_RADIUS_X),
           y: this.random(this.RING_RADIUS_X, this.canvasData.height - this.RING_RADIUS_X),
+          rings: [],
         };
 
         // On vérifie parmi toutes les coordonnées déjà générées pour le nombre de planète récupéré si en fonction
@@ -109,7 +137,7 @@ export default {
         // à générer et on dessine la nouvelle planète
         } else {
           this.ellipses.push(newEllipse);
-          this.generatePlanet(newEllipse.x, newEllipse.y);
+          this.generatePlanet(newEllipse);
         }
       }
     },
@@ -129,56 +157,88 @@ export default {
       return color;
     },
     // Fonction de dessin d'une planète (ellipse ronde)
-    drawMainEllipse(x, y) {
+    // @param color => utile lors de la mise à jour de la planète pour garder la même couleur à chaque frame
+    drawMainEllipse(ellipse, color=null) {
       let ctx = this.$refs.canvas.getContext('2d');
+      let randomColor = color ? color : this.getRandomColor();
       ctx.beginPath();
-      let randomColor = this.getRandomColor();
       ctx.shadowColor = randomColor;
       ctx.shadowBlur = 15;
       ctx.fillStyle = randomColor;
       // De 0 à 2PI, cercle trigonométrique
-      ctx.ellipse(x, y, this.PLANET_RADIUS, this.PLANET_RADIUS, 0,  0, 2 * Math.PI);
+      ctx.ellipse(ellipse.x, ellipse.y, this.PLANET_RADIUS, this.PLANET_RADIUS, 0,  0, 2 * Math.PI);
       ctx.fill();
       ctx.closePath();
+      !color && (ellipse.color = randomColor);
     },
-    // drawRandomPeculiarity(x, y) {
-    //   let ctx = this.$refs.canvas.getContext('2d');
-    //   ctx.beginPath();
-    //   ctx.fillStyle = this.getRandomColor();
-    //   let randomX = this.random(x - 40, x);
-    //   let randomY = this.random(y - 40, y);
-    //   ctx.ellipse(randomX, randomY,  this.random(10, 40), this.random(10, 40), 0,  0, 2 * Math.PI);
-    //   ctx.fill();
-    //   ctx.closePath();
-    // },
     // Fonction de dessin d'un anneau (ellipse ovale partielle)
-    drawRing(x, y) {
+    drawRing(ellipse) {
+      let ctx = this.$refs.canvas.getContext('2d');
+      let randomColor = this.getRandomColor();
+      let lineWidth = this.random(8, 14);
+      ctx.beginPath();
+
+      // Ajoute une ombre
+      ctx.shadowColor = randomColor;
+      ctx.shadowBlur = 5;
+
+      // Ajoute la couleur de l'ellipse
+      ctx.strokeStyle = randomColor;
+
+      // Modifie la largeur de l'ellipse
+      ctx.lineWidth = lineWidth;
+
+      // Dessine l'ellipse
+      // Angle de rotation aléatoire
+      let randomRot = this.random(0,180)
+      ctx.ellipse(ellipse.x, ellipse.y, this.RING_RADIUS_X, this.RING_RADIUS_Y, randomRot,  -0.27 * Math.PI, 1.27 * Math.PI);
+      ctx.stroke();
+
+      // Ajout des données de l'anneau dans l'array rings de l'ellipse correspondante, avec une vitesse de rotation aléatoire
+      ellipse.rings.push({
+        color: randomColor,
+        rot: randomRot,
+        lineWidth: lineWidth,
+        celerity: this.random(1,3)
+      });
+    },
+    // Mise à jour de l'état d'un anneau en fonction de la nouvelle rotation donnée
+    updateRing(ellipse, color, rot, lineWidth) {
       let ctx = this.$refs.canvas.getContext('2d');
       ctx.beginPath();
-      let randomColor = this.getRandomColor();
+      let randomColor = color;
       // Ajoute une ombre
       ctx.shadowColor = randomColor;
       ctx.shadowBlur = 5;
 
       // Ajoute la colour de l'ellipse
       ctx.strokeStyle = randomColor;
-      ctx.lineWidth = this.random(8, 14);
+      ctx.lineWidth = lineWidth;
 
       // Dessine l'ellipse
-      ctx.ellipse(x, y, this.RING_RADIUS_X, this.RING_RADIUS_Y, this.random(0,180),  -0.27 * Math.PI, 1.27 * Math.PI);
+      // Angle de rotation aléatoire
+      ctx.ellipse(ellipse.x, ellipse.y, this.RING_RADIUS_X, this.RING_RADIUS_Y, rot,  -0.27 * Math.PI, 1.27 * Math.PI);
       ctx.stroke();
     },
     // Fonction de création d'une planète
-    generatePlanet(x, y) {
+    generatePlanet(ellipse) {
       // Dessine la partie principale de la planète
-      this.drawMainEllipse(x, y);
+      this.drawMainEllipse(ellipse);
 
       // Ajoute un ou plusieurs anneaux à la planète aléatoirement
       for (let i = 1; i <= 6; i++) {
         if (this.random(0, i >= 3 ? i * 2 : i * 3) === 0) {
-          this.drawRing(x, y);
+          this.drawRing(ellipse);
         }
       }
+    },
+    // Mise à jour de l'état de la planète
+    updatePlanet(ellipse) {
+      // Dessine la partie principale de la planète
+      this.drawMainEllipse(ellipse, ellipse.color);
+      ellipse.rings.map((e) => {
+        this.updateRing(ellipse, e.color, e.rot);
+      });
     }
   },
 }
