@@ -2,7 +2,7 @@
   <v-card
     elevation="12"
     width="200"
-    style="position:fixed; left: 1em; top: 1em"
+    class="custom-card"
   >
     <v-navigation-drawer
       color="deep-purple lighten-5"
@@ -19,6 +19,7 @@
           :to="item.route && (item.route)"
           @click="item.click() && (item.click())"
           link
+          class="text-left"
         >
           <v-list-item-content>
             <span v-bind:class = "(item.class_color) ? item.class_color : 'black--text'">
@@ -41,3 +42,10 @@ export default {
 }
 </script>
 
+<style lang="scss">
+  .custom-card {
+    position: fixed;
+    left: 1em;
+    top: 1em
+  }
+</style>

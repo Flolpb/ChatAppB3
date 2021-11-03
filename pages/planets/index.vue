@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div class="text-center">
     <SidebarMenu :items="sidebarItems" />
-    <canvas :width="canvasData.width" :height="canvasData.height" ref="canvas" id="canvas" style="overflow-x: hidden;  "></canvas>
+    <canvas class="text-center" :width="canvasData.width" :height="canvasData.height" ref="canvas" id="canvas" style="overflow-x: hidden;  "></canvas>
   </div>
 </template>
 
@@ -14,14 +14,23 @@ export default {
   data: () => ({
     sidebarItems: [],
     planets: [],
-    canvasData: {}
+    canvasData: {},
+    ellipses: [],
+    PLANET_RADIUS: 0,
+    RING_RADIUS_X: 0,
+    RING_RADIUS_Y: 0,
   }),
   created() {
+    this.PLANET_RADIUS = 80;
+    this.RING_RADIUS_X = 120;
+    this.RING_RADIUS_Y = 15;
+    this.CANVAS_MARGIN_X = 200;
+
     if (process.browser) {
       this.canvasData = {
-        width: window.innerWidth,
+        width: window.innerWidth - this.CANVAS_MARGIN_X,
         height: window.innerHeight,
-      }
+      };
     }
   },
   async mounted() {
@@ -53,18 +62,110 @@ export default {
     random(min, max) {
       return Math.floor(Math.random() * (max - min + 1) + min)
     },
+    // Fonction de dessin de toutes les planètes
     drawPlanets() {
-      this.planets.map((planet) => {
-        this.generatePlanet(this.random(0, this.canvasData.width), this.random(0, this.canvasData.height));
+      // Flush des ellipses (si on recommence le dessin du canvas)
+      this.ellipses = [];
+      // Variable de limite pour éviter le crash si le canvas n'a pas assez de place
+      let limit = 0;
+      // On limite à 10000 essais de génération de coordonnées
+      for (let i = 0; i < 500 && limit < 10000; i++) {
+        // On crée une objet avec des coordonnées aléatoire
+        let newEllipse = {
+          // id: this.planets[i].id,
+          x: this.random(this.RING_RADIUS_X, this.canvasData.width - this.RING_RADIUS_X),
+          y: this.random(this.RING_RADIUS_X, this.canvasData.height - this.RING_RADIUS_X),
+        };
+
+        // On vérifie parmi toutes les coordonnées déjà générées pour le nombre de planète récupéré si en fonction
+        // du radius maximal par défaut des ellipses (RING_RADIUS_X, le plus grand radius, celui des anneaux) la
+        // nouvelle ellipse chevauche une autre selon la fonction distance = element1.radius + element2.radius
+        let overlapping = this.ellipses.some((ellipse) => {
+          return this.getDistance(newEllipse.x, newEllipse.y, ellipse.x, ellipse.y) < this.RING_RADIUS_X * 2;
+        })
+
+        // Si chevauchement il y a, on refait le même tour de boucle pour la planète donnée
+        if (overlapping) {
+          i--; limit++;
+        // Sinon on ajoute les nouvelles coordonnées dans le tableau ellipses pour la vérification des autres coordonnées
+        // à générer et on dessine la nouvelle planète
+        } else {
+          this.ellipses.push(newEllipse);
+          this.generatePlanet(newEllipse.x, newEllipse.y);
+        }
+      }
+    },
+    // Fonction de calcule de distance entre deux points x et y
+    getDistance(xA, yA, xB, yB) {
+      let xDiff = xA - xB;
+      let yDiff = yA - yB;
+      return Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+    },
+    // Fonction de génération d'une couleur aléatoire
+    getRandomColor() {
+      var letters = '0123456789ABCDEF'.split('');
+      var color = '#';
+      for (var i = 0; i < 6; i++ ) {
+        color += letters[Math.round(Math.random() * 15)];
+      }
+      return color;
+    },
+    // Fonction de dessin d'une planète (ellipse ronde)
+    drawMainEllipse(x, y) {
+      let ctx = this.$refs.canvas.getContext('2d');
+      ctx.beginPath();
+      let randomColor = this.getRandomColor();
+      ctx.shadowColor = randomColor;
+      ctx.shadowBlur = 15;
+      ctx.fillStyle = randomColor;
+      // De 0 à 2PI, cercle trigonométrique
+      ctx.ellipse(x, y, this.PLANET_RADIUS, this.PLANET_RADIUS, 0,  0, 2 * Math.PI);
+      ctx.fill();
+      ctx.closePath();
+
+      this.ellipses.push({
+        x: x,
+        y: y,
       })
     },
+    // drawRandomPeculiarity(x, y) {
+    //   let ctx = this.$refs.canvas.getContext('2d');
+    //   ctx.beginPath();
+    //   ctx.fillStyle = this.getRandomColor();
+    //   let randomX = this.random(x - 40, x);
+    //   let randomY = this.random(y - 40, y);
+    //   ctx.ellipse(randomX, randomY,  this.random(10, 40), this.random(10, 40), 0,  0, 2 * Math.PI);
+    //   ctx.fill();
+    //   ctx.closePath();
+    // },
+    // Fonction de dessin d'un anneau (ellipse ovale partielle)
+    drawRing(x, y) {
+      let ctx = this.$refs.canvas.getContext('2d');
+      ctx.beginPath();
+      let randomColor = this.getRandomColor();
+      // Ajoute une ombre
+      ctx.shadowColor = randomColor;
+      ctx.shadowBlur = 5;
+
+      // Ajoute la colour de l'ellipse
+      ctx.strokeStyle = randomColor;
+      ctx.lineWidth = this.random(8, 14);
+
+      // Dessine l'ellipse
+      ctx.ellipse(x, y, this.RING_RADIUS_X, this.RING_RADIUS_Y, this.random(0,180),  -0.27 * Math.PI, 1.27 * Math.PI);
+      ctx.stroke();
+    },
+    // Fonction de création d'une planète
     generatePlanet(x, y) {
-      let context = this.$refs.canvas.getContext('2d');
-      context.beginPath();
-      context.fillStyle = 'snow';
-      // De 0 à 2PI, cercle trigonométrique
-      context.ellipse(x, y, 80, 80, 0,  0, 2 * Math.PI);
-      context.fill();
+      // Dessine la partie principale de la planète
+      this.drawMainEllipse(x, y);
+
+      // Ajoute un ou plusieurs anneaux à la planète aléatoirement
+      for (let i = 1; i <= 6; i++) {
+        if (this.random(0, i >= 3 ? i * 2 : i * 3) === 0) {
+          this.drawRing(x, y);
+        }
+      }
     }
   },
 }
