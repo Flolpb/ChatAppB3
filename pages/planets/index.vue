@@ -58,6 +58,18 @@ export default {
       });
       clickedPlanet && (this.redirectToPlanet(clickedPlanet.id))
     });
+
+    this.$refs.canvas.addEventListener('mousemove', (e) => {
+      let clickedPlanet = this.ellipses.find((ellipse) => {
+        return (e.offsetX <= ellipse.x + this.RING_RADIUS_X)
+          && (e.offsetX >= ellipse.x - this.RING_RADIUS_X)
+          && (e.offsetY >= ellipse.y - this.RING_RADIUS_X)
+          && (e.offsetY <= ellipse.y + this.RING_RADIUS_X)
+      });
+      let canvas = document.getElementById('canvas');
+      clickedPlanet ? canvas.classList.add('canvas-cursor') : canvas.classList.remove('canvas-cursor');
+    });
+
   },
   destroyed() {
     clearInterval(this.cyclicRedraw)
@@ -82,8 +94,8 @@ export default {
     // Adapte la taille du canvas en fonction du nombre de planètes avant de commencer le dessin
     updateCanvasHeight() {
       if (process.browser) {
-        // (Nb de planètes * Aire pour une planète (125 000 px²)) / (largeur de l'écran - marge du canvas)
-        let height = (this.planets.length * 125000) / (window.innerWidth - this.CANVAS_MARGIN_X)
+        // (Nb de planètes * Aire pour une planète (218 868 px²)) / (largeur de l'écran - marge du canvas)
+        let height = (this.planets.length * 218868) / (window.innerWidth - this.CANVAS_MARGIN_X)
         this.canvasData = {
           width: window.innerWidth - this.CANVAS_MARGIN_X,
           // Si la hauteur calculée pour un nombre de planètes donné est inférieur à celle de l'écran, on prend celle de l'écran
@@ -224,4 +236,7 @@ export default {
 </script>
 
 <style scoped>
+  .canvas-cursor {
+    cursor: pointer;
+  }
 </style>

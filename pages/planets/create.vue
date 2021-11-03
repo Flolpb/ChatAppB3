@@ -95,7 +95,7 @@
         generateRings() {
           let rings = [];
           for (let i = 1; i <= 6; i++) {
-            if (this.random(0, i >= 3 ? i * 2 : i * 3) === 0) {
+            if (this.random(0, i >= 3 ? i * 3 : i * 2) === 0) {
               rings.push({
                 color: this.getRandomColor(),
                 rot: this.random(0,180),
