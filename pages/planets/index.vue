@@ -1,8 +1,7 @@
 <template>
   <div class="text-center">
     <SidebarMenu :items="sidebarItems" />
-<!--    <canvas class="text-center" :width="canvasData.width" :height="canvasData.height" ref="canvas" id="canvas" style="overflow-x: hidden;  "></canvas>-->
-    <canvas class="text-center"  ref="canvas" id="canvas" style="overflow-x: hidden;  "></canvas>
+      <canvas class="text-center" ref="canvas" id="canvas"></canvas>
   </div>
 </template>
 
@@ -20,14 +19,22 @@ export default {
     PLANET_RADIUS: 0,
     RING_RADIUS_X: 0,
     RING_RADIUS_Y: 0,
+    GLOBAL_PLANET_RADIUS: 0,
     CANVAS_MARGIN_X: 0,
     FPS: 0,
   }),
   async mounted() {
+    // Radius de chaque rond / planète
     this.PLANET_RADIUS = 80;
+    // Radius en X de chaque anneau
     this.RING_RADIUS_X = 120;
+    // Radius en Y de chaque anneau
     this.RING_RADIUS_Y = 15;
+    // Radius global d'une planète et de ses anneaux (plus grand que RING_RADIUS_X pour laisser de la place pour le nom de la planète)
+    this.GLOBAL_PLANET_RADIUS = 150;
+    // Marge du canvas en X
     this.CANVAS_MARGIN_X = 200;
+    // FPS pour les animations
     this.FPS = 60;
 
     // On remplit le tableau quand le composant est initialisé, sinon les appels de fonction depuis les composants enfants
@@ -75,8 +82,8 @@ export default {
     // Adapte la taille du canvas en fonction du nombre de planètes avant de commencer le dessin
     updateCanvasHeight() {
       if (process.browser) {
-        // (Nb de planètes * Aire pour une planète (117 000 px²)) / (largeur de l'écran - marge du canvas)
-        let height = (this.planets.length * 117000) / (window.innerWidth - this.CANVAS_MARGIN_X)
+        // (Nb de planètes * Aire pour une planète (125 000 px²)) / (largeur de l'écran - marge du canvas)
+        let height = (this.planets.length * 125000) / (window.innerWidth - this.CANVAS_MARGIN_X)
         this.canvasData = {
           width: window.innerWidth - this.CANVAS_MARGIN_X,
           // Si la hauteur calculée pour un nombre de planètes donné est inférieur à celle de l'écran, on prend celle de l'écran
@@ -121,8 +128,9 @@ export default {
         // On crée une objet avec des coordonnées aléatoire
         let newEllipse = {
           id: this.planets[i].id,
-          x: this.random(this.RING_RADIUS_X, this.canvasData.width - this.RING_RADIUS_X),
-          y: this.random(this.RING_RADIUS_X, this.canvasData.height - this.RING_RADIUS_X),
+          name: this.planets[i].name,
+          x: this.random(this.GLOBAL_PLANET_RADIUS, this.canvasData.width - this.GLOBAL_PLANET_RADIUS),
+          y: this.random(this.GLOBAL_PLANET_RADIUS, this.canvasData.height - this.GLOBAL_PLANET_RADIUS),
           color: this.planets[i].skin.color,
           rings: this.planets[i].skin.rings ? this.planets[i].skin.rings : [],
         };
@@ -131,7 +139,7 @@ export default {
         // du radius maximal par défaut des ellipses (RING_RADIUS_X, le plus grand radius, celui des anneaux) la
         // nouvelle ellipse chevauche une autre selon la fonction distance = element1.radius + element2.radius
         let overlapping = this.ellipses.some((ellipse) => {
-          return this.getDistance(newEllipse.x, newEllipse.y, ellipse.x, ellipse.y) < this.RING_RADIUS_X * 2;
+          return this.getDistance(newEllipse.x, newEllipse.y, ellipse.x, ellipse.y) < this.GLOBAL_PLANET_RADIUS * 2;
         })
 
         // Si chevauchement il y a, on refait le même tour de boucle pour la planète donnée
@@ -192,11 +200,23 @@ export default {
       // Angle de rotation aléatoire
       ctx.ellipse(ellipse.x, ellipse.y, this.RING_RADIUS_X, this.RING_RADIUS_Y, ring.rot,  -0.27 * Math.PI, 1.27 * Math.PI);
       ctx.stroke();
+      ctx.closePath();
+    },
+    drawPlanetName(ellipse) {
+      let ctx = this.$refs.canvas.getContext('2d');
+      ctx.beginPath();
+      ctx.shadowColor = "";
+      ctx.shadowBlur = 0;
+      ctx.font = "20px Montserrat";
+      ctx.textAlign = "center";
+      ctx.fillText(ellipse.name, ellipse.x, ellipse.y + this.GLOBAL_PLANET_RADIUS);
+      ctx.closePath();
     },
     // Fonction de dessin d'une planète
     generatePlanet(ellipse) {
       // Dessine la partie principale de la planète
       this.drawMainEllipse(ellipse);
+      this.drawPlanetName(ellipse);
       ellipse.rings.map((ring) => this.drawRing(ellipse, ring))
     },
   },
