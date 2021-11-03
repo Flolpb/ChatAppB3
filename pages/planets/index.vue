@@ -71,12 +71,4 @@ export default {
 </script>
 
 <style scoped>
-  .image {
-    filter: drop-shadow(0 0 0.75rem grey);
-    transition: 0.3s;
-    cursor: pointer;
-  }
-  .image:hover {
-    transform: scale(1.20);
-  }
 </style>
