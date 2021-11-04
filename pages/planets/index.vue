@@ -40,6 +40,7 @@ export default {
     // On remplit le tableau quand le composant est initialisé, sinon les appels de fonction depuis les composants enfants
     // ne marche pas car les fonctions n'ont pas le temps de charger et de s'ajouter à la méthode click
     this.sidebarItems = [
+      { title: 'Nouvelle planète', route:'/planets/create', class_color: 'blue--text' },
       { title: 'Profil', route:'/profile' },
       { title: 'Amis', route:'/friends' },
       { title: 'Paramètres', route:'/parameter' },

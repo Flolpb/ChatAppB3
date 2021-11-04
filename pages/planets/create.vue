@@ -2,8 +2,10 @@
   <v-container fill-height fluid class="container">
     <v-row align="center" justify="center" class="row fill-height">
       <v-col cols="10" align="center">
-        <CustomTitle :title="'Nouvelle planète'" />
-
+        <CustomTitle
+          :back-icon-click="() => this.$router.push('/planets')"
+          :back-message="'Retour à la iste des planètes'"
+          :title="'Nouvelle planète'" />
         <v-form ref="form" v-model="valid" lazy-validation>
           <v-text-field
             class="text-field"

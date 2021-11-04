@@ -19,7 +19,7 @@
           :to="item.route && (item.route)"
           @click="item.click() && (item.click())"
           link
-          class="text-left"
+          class="text-left custom-list-item"
         >
           <v-list-item-content>
             <span v-bind:class = "(item.class_color) ? item.class_color : 'black--text'">
@@ -47,5 +47,11 @@ export default {
     position: fixed;
     left: 1em;
     top: 1em
+  }
+  .custom-list-item {
+    transition: 0.3s;
+  }
+  .custom-list-item:hover {
+    background-color: snow;
   }
 </style>
