@@ -11,6 +11,7 @@ import {ACTIONS} from "../../store/auth";
 export default {
   name: "index",
   components: {SidebarMenu},
+  middleware: 'disconnect',
   data: () => ({
     sidebarItems: [],
     planets: [],
