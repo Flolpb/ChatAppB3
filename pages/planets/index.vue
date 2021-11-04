@@ -26,7 +26,7 @@ export default {
     FPS: 0,
   }),
   async mounted() {
-    await this.$store.dispatch(ACTIONS.GET_PLANETS);
+    await this.$store.dispatch(ACTIONS_PLANET.GET_PLANETS);
     // Radius de chaque rond / planète
     this.PLANET_RADIUS = 80;
     // Radius en X de chaque anneau
