@@ -68,14 +68,14 @@ export default {
     });
 
     this.$refs.canvas.addEventListener('mousemove', (e) => {
-      let clickedPlanet = this.ellipses.find((ellipse) => {
+      let mousedPlanet = this.ellipses.find((ellipse) => {
         return (e.offsetX <= ellipse.x + this.RING_RADIUS_X)
           && (e.offsetX >= ellipse.x - this.RING_RADIUS_X)
           && (e.offsetY >= ellipse.y - this.RING_RADIUS_X)
           && (e.offsetY <= ellipse.y + this.RING_RADIUS_X)
       });
       let canvas = document.getElementById('canvas');
-      clickedPlanet ? canvas.classList.add('canvas-cursor') : canvas.classList.remove('canvas-cursor');
+      mousedPlanet ? canvas.classList.add('canvas-cursor') : canvas.classList.remove('canvas-cursor');
     });
 
   },
@@ -234,8 +234,8 @@ export default {
       ctx.beginPath();
       ctx.shadowColor = "";
       ctx.shadowBlur = 0;
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "20px Montserrat";
+      ctx.fillStyle = "#EDE3E8";
+      ctx.font = "18px HelveticaNowText-Medium";
       ctx.textAlign = "center";
       ctx.fillText(ellipse.name, ellipse.x, ellipse.y + this.GLOBAL_PLANET_RADIUS);
       ctx.closePath();
@@ -251,7 +251,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
   .canvas-cursor {
     cursor: pointer;
   }
