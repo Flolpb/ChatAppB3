@@ -7,7 +7,7 @@
 
 <script>
 import SidebarMenu from "../../components/SidebarMenu";
-import {ACTIONS} from "../../store/auth";
+import {ACTIONS} from "../../store/planets";
 export default {
   name: "index",
   components: {SidebarMenu},
@@ -24,6 +24,10 @@ export default {
     CANVAS_MARGIN_X: 0,
     FPS: 0,
   }),
+  async fetch() {
+    // Récupération des planètes
+    await this.$store.dispatch(ACTIONS.GET_PLANETS);
+  },
   async mounted() {
     // Radius de chaque rond / planète
     this.PLANET_RADIUS = 80;
@@ -47,7 +51,9 @@ export default {
       { title: 'Paramètres', route:'/parameter' },
       { title: 'Se déconnecter', click: () => this.logout(), class_color: 'red--text'}
     ];
-    this.planets = await this.getPlanets();
+
+    // Copie du tableau enregistré dans le state
+    this.planets = JSON.parse(JSON.stringify(this.$store.state.planets.planets));
     this.updateCanvasHeight();
 
     // Ajout d'un évènement onClick sur le canvas pour entrer dans une planète
