@@ -90,10 +90,6 @@ export default {
       this.$cookies.remove('uid');
       this.$router.push('/login');
     },
-    async getPlanets() {
-      const ref = await this.$fire.firestore.collection("planets").get()
-      return ref.docs.map(doc => doc.data());
-    },
     redirectToPlanet(planetId) {
       this.$router.push(`/planets/${planetId}`)
     },
