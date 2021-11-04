@@ -41,22 +41,27 @@ export default {
       this.spinner = true;
       try {
         this.provider = new this.$fireModule.auth.GoogleAuthProvider();
-        this.$fireModule.auth().signInWithPopup(this.provider).then(result => {
-          const newUser = {
-            email: result.user.email,
-            displayName: result.user.displayName,
-            photoURL: result.user.photoURL,
-            uid: result.user.uid
-          };
-          this.$store.dispatch(ACTIONS.LOGIN, newUser).then(() => {
-            this.$cookies.set('uid', newUser.uid, {
-              path: '/',
-              maxAge: 60 * 60 * 24 * 7
+        this.$fireModule.auth().signInWithPopup(this.provider).then(
+          (result) => {
+            const newUser = {
+              email: result.user.email,
+              displayName: result.user.displayName,
+              photoURL: result.user.photoURL,
+              uid: result.user.uid
+            };
+            this.$store.dispatch(ACTIONS.LOGIN, newUser).then(() => {
+              this.$cookies.set('uid', newUser.uid, {
+                path: '/',
+                maxAge: 60 * 60 * 24 * 7
+              });
+              this.$router.push('/planets');
+              // Ligne commentée car on ne réinitialise pas le spinner au moment de la redirection (plus propre visuellement)
+              //this.spinner = false;
             });
-            this.$router.push('/planets');
-            // Ligne commentée car on ne réinitialise pas le spinner au moment de la redirection (plus propre visuellement)
-            //this.spinner = false;
-          });
+        },
+        (err) => {
+            console.log(err)
+          this.spinner = false;
         });
       } catch (e) {
         this.spinner = false;

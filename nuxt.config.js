@@ -1,4 +1,7 @@
 import colors from 'vuetify/es5/util/colors'
+const dotenv = require('dotenv');
+let path = '.env';
+dotenv.config({path})
 
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
@@ -35,6 +38,7 @@ export default {
   buildModules: [
     // https://go.nuxtjs.dev/vuetify
     '@nuxtjs/vuetify',
+    '@nuxtjs/dotenv'
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
@@ -45,12 +49,12 @@ export default {
 
   firebase: {
     config: {
-      apiKey: "AIzaSyAgT-ZtZ_YI1EUakpxjZNvCKnKrXCWBggU",
-      authDomain: "chatappnuxtjs.firebaseapp.com",
-      projectId: "chatappnuxtjs",
-      storageBucket: "chatappnuxtjs.appspot.com",
-      messagingSenderId: "921789699071",
-      appId: "1:921789699071:web:b3c346e8a38b1369e84dca"
+      apiKey: process.env.apiKey,
+      authDomain: process.env.authDomain,
+      projectId: process.env.projectId,
+      storageBucket: process.env.storageBucket,
+      messagingSenderId: process.env.messagingSenderId,
+      appId: process.env.appId
     },
     services: {
       auth: true,

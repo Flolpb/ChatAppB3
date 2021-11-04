@@ -1,4 +1,4 @@
-// Fonction de génération d'un nombre aléatoire compris en min et max
+// Fonction de génération d'un nombre entier aléatoire compris en min et max
 export let random = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1) + min)
 }
