@@ -48,23 +48,15 @@ export default {
             photoURL: result.user.photoURL,
             uid: result.user.uid
           };
-          const userRef = this.$fire.firestore.collection("users").doc(newUser.uid);
-          userRef.set({
-              displayName: newUser.displayName,
-              email: newUser.email,
-              photoURL: newUser.photoURL,
-          });
           this.$store.dispatch(ACTIONS.LOGIN, newUser).then(() => {
             this.$cookies.set('uid', newUser.uid, {
               path: '/',
               maxAge: 60 * 60 * 24 * 7
             });
             this.$router.push('/planets');
-
             // Ligne commentée car on ne réinitialise pas le spinner au moment de la redirection (plus propre visuellement)
             //this.spinner = false;
           });
-
         });
       } catch (e) {
         this.spinner = false;

@@ -52,17 +52,18 @@
 <script>
   import CustomButton from "../../components/CustomButton";
   import CustomTitle from "../../components/CustomTitle";
+  import { random, getRandomColor } from "../../utils/commonFunctions";
+  import {ACTIONS as ACTIONS_PLANET} from "../../store/planets";
   export default {
     components: {CustomTitle, CustomButton},
     middleware: 'disconnect',
     data: () => ({
       spinner: false,
       valid: true,
-      planetRef: null,
       planet: {
-        name: "Test",
+        name: "",
         nameRules: [(v) => !!v || "Le nom est requis"],
-        theme: "Test",
+        theme: "",
         themeRules: [(v) => !!v || "Le thème est requis"],
       },
       PLANET_RADIUS: 0,
@@ -76,30 +77,18 @@
           this.spinner = true;
           try {
             this.valid = this.$refs.form.validate()
-            // if (this.valid) {
-            //   let planet = {
-            //     id: "test",
-            //     name: this.planet.name,
-            //     theme: this.planet.theme,
-            //     skin: this.generatePlanetSkin(),
-            //   }
-            //   this.formToCanvasTransition();
-            //   this.updateCanvasHeight(planet);
-            //   this.launchDrawing(planet);
-            // }
             if (this.valid) {
               let planet = {
-                id: this.planetRef.id,
                 name: this.planet.name,
                 theme: this.planet.theme,
                 skin: this.generatePlanetSkin(),
               }
-              await this.planetRef.set(planet).then(r => {
+              this.$store.dispatch(ACTIONS_PLANET.ADD_PLANET, planet).then(planetId => {
                 this.formToCanvasTransition();
                 this.updateCanvasHeight(planet);
                 this.launchDrawing(planet);
                 setTimeout(() => {
-                  this.$router.push("/planets/" + this.planetRef.id);
+                  this.$router.push("/planets/" + planetId);
                   // Ligne commentée car on ne réinitialise pas le spinner au moment de la redirection (plus propre visuellement)
                   //this.spinner = false;
                 }, 7000);
@@ -115,36 +104,24 @@
         },
         generatePlanetSkin() {
           return {
-            start_color: this.getRandomColor(),
-            end_color: this.getRandomColor(),
+            start_color: getRandomColor(),
+            end_color: getRandomColor(),
             rings: this.generateRings(),
           }
         },
         generateRings() {
           let rings = [];
           for (let i = 1; i <= 6; i++) {
-            if (this.random(0, i >= 3 ? i * 3 : i * 2) === 0) {
+            if (random(0, i >= 3 ? i * 3 : i * 2) === 0) {
               rings.push({
-                color: this.getRandomColor(),
-                rot: this.random(0,180),
-                lineWidth: this.random(8, 14),
-                celerity: this.random(1,3),
+                color: getRandomColor(),
+                rot: random(0,180),
+                lineWidth: random(8, 14),
+                celerity: random(1,3),
               })
             }
           }
           return rings;
-        },
-        random(min, max) {
-          return Math.floor(Math.random() * (max - min + 1) + min)
-        },
-        // Fonction de génération d'une couleur aléatoire
-        getRandomColor() {
-          var letters = '0123456789ABCDEF'.split('');
-          var color = '#';
-          for (var i = 0; i < 6; i++ ) {
-            color += letters[Math.round(Math.random() * 15)];
-          }
-          return color;
         },
         formToCanvasTransition() {
           let rowForm = document.getElementById('row-form');
@@ -273,9 +250,6 @@
         this.GLOBAL_PLANET_RADIUS = 220;
         // FPS pour les animations
         this.FPS = 60;
-
-        // Récupération du firestore
-        this.planetRef = this.$fire.firestore.collection("planets").doc();
       },
       destroyed() {
         clearInterval(this.cyclicRedraw);

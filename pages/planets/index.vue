@@ -1,17 +1,16 @@
 <template>
   <div>
-    <div v-if="loading" 
-    class="d-flex justify-center" style="margin-top: 40vh; transform: translateY(-50%);" >
-        <v-progress-circular
-              indeterminate
-              color="#ede3e8"
-              :size="200"
-              :width="10"
-            ></v-progress-circular>
+    <div v-if="loading" class="d-flex justify-center" style="margin-top: 40vh; transform: translateY(-50%);" >
+      <v-progress-circular
+        indeterminate
+        color="#ede3e8"
+        :size="200"
+        :width="10"
+      ></v-progress-circular>
     </div>
     <div class="text-center">
       <SidebarMenu v-if="!loading" :items="sidebarItems"/>
-        <canvas class="text-center" ref="canvas" id="canvas"></canvas>
+      <canvas class="text-center" ref="canvas" id="canvas"></canvas>
     </div>
   </div>
 </template>
@@ -20,6 +19,8 @@
 import SidebarMenu from "../../components/SidebarMenu";
 import {ACTIONS as ACTIONS_PLANET } from "../../store/planets";
 import {ACTIONS as ACTIONS_AUTH } from "../../store/auth";
+import {checkInCircle, getDistance, random} from "../../utils/commonFunctions"
+import {colors} from "../../assets/colors";
 export default {
   name: "index",
   components: {SidebarMenu},
@@ -38,7 +39,9 @@ export default {
     loading: true,
   }),
   async mounted() {
+    // Récupération des planètes
     await this.$store.dispatch(ACTIONS_PLANET.GET_PLANETS);
+
     // Radius de chaque rond / planète
     this.PLANET_RADIUS = 80;
     // Radius en X de chaque anneau
@@ -69,22 +72,12 @@ export default {
 
     // Ajout d'un évènement onClick sur le canvas pour entrer dans une planète
     this.$refs.canvas.addEventListener('click', (e) => {
-      let clickedPlanet = this.ellipses.find((ellipse) => {
-        return (e.offsetX <= ellipse.x + this.RING_RADIUS_X)
-          && (e.offsetX >= ellipse.x - this.RING_RADIUS_X)
-          && (e.offsetY >= ellipse.y - this.RING_RADIUS_X)
-          && (e.offsetY <= ellipse.y + this.RING_RADIUS_X)
-      });
+      let clickedPlanet = this.ellipses.find((ellipse) => checkInCircle(e.offsetX, e.offsetY, ellipse.x, ellipse.y, this.RING_RADIUS_X));
       clickedPlanet && (this.redirectToPlanet(clickedPlanet.id))
     });
 
     this.$refs.canvas.addEventListener('mousemove', (e) => {
-      let mousedPlanet = this.ellipses.find((ellipse) => {
-        return (e.offsetX <= ellipse.x + this.RING_RADIUS_X)
-          && (e.offsetX >= ellipse.x - this.RING_RADIUS_X)
-          && (e.offsetY >= ellipse.y - this.RING_RADIUS_X)
-          && (e.offsetY <= ellipse.y + this.RING_RADIUS_X)
-      });
+      let mousedPlanet = this.ellipses.find((ellipse) => checkInCircle(e.offsetX, e.offsetY, ellipse.x, ellipse.y, this.RING_RADIUS_X));
       let canvas = document.getElementById('canvas');
       mousedPlanet ? canvas.classList.add('canvas-cursor') : canvas.classList.remove('canvas-cursor');
     });
@@ -95,16 +88,13 @@ export default {
   },
   methods: {
     async logout() {
-      await this.$fireModule.auth().signOut();
+      // await this.$fireModule.auth().signOut();
       this.$store.dispatch(ACTIONS_AUTH.LOGOUT);
-      this.$cookies.remove('uid');
+      // this.$cookies.remove('uid');
       this.$router.push('/login');
     },
     redirectToPlanet(planetId) {
       this.$router.push(`/planets/${planetId}`)
-    },
-    random(min, max) {
-      return Math.floor(Math.random() * (max - min + 1) + min)
     },
     // Adapte la taille du canvas en fonction du nombre de planètes avant de commencer le dessin
     updateCanvasHeight() {
@@ -156,8 +146,8 @@ export default {
         let newEllipse = {
           id: this.planets[i].id,
           name: this.planets[i].name,
-          x: this.random(this.GLOBAL_PLANET_RADIUS, this.canvasData.width - this.GLOBAL_PLANET_RADIUS),
-          y: this.random(this.GLOBAL_PLANET_RADIUS, this.canvasData.height - this.GLOBAL_PLANET_RADIUS),
+          x: random(this.GLOBAL_PLANET_RADIUS, this.canvasData.width - this.GLOBAL_PLANET_RADIUS),
+          y: random(this.GLOBAL_PLANET_RADIUS, this.canvasData.height - this.GLOBAL_PLANET_RADIUS),
           start_color: this.planets[i].skin.start_color,
           end_color: this.planets[i].skin.end_color,
           rings: this.planets[i].skin.rings ? this.planets[i].skin.rings : [],
@@ -166,9 +156,7 @@ export default {
         // On vérifie parmi toutes les coordonnées déjà générées pour le nombre de planète récupéré si en fonction
         // du radius maximal par défaut des ellipses (RING_RADIUS_X, le plus grand radius, celui des anneaux) la
         // nouvelle ellipse chevauche une autre selon la fonction distance = element1.radius + element2.radius
-        let overlapping = this.ellipses.some((ellipse) => {
-          return this.getDistance(newEllipse.x, newEllipse.y, ellipse.x, ellipse.y) < this.GLOBAL_PLANET_RADIUS * 2;
-        })
+        let overlapping = this.ellipses.some((ellipse) => getDistance(newEllipse.x, newEllipse.y, ellipse.x, ellipse.y) < this.GLOBAL_PLANET_RADIUS * 2);
 
         // Si chevauchement il y a, on refait le même tour de boucle pour la planète donnée
         if (overlapping) {
@@ -180,21 +168,6 @@ export default {
           this.generatePlanet(newEllipse);
         }
       }
-    },
-    // Fonction de calcule de distance entre deux points x et y
-    getDistance(xA, yA, xB, yB) {
-      let xDiff = xA - xB;
-      let yDiff = yA - yB;
-      return Math.sqrt(xDiff * xDiff + yDiff * yDiff);
-    },
-    // Fonction de génération d'une couleur aléatoire
-    getRandomColor() {
-      var letters = '0123456789ABCDEF'.split('');
-      var color = '#';
-      for (var i = 0; i < 6; i++ ) {
-        color += letters[Math.round(Math.random() * 15)];
-      }
-      return color;
     },
     // Fonction de dessin d'une planète (ellipse ronde)
     // @param color => utile lors de la mise à jour de la planète pour garder la même couleur à chaque frame
@@ -241,7 +214,7 @@ export default {
       ctx.beginPath();
       ctx.shadowColor = "";
       ctx.shadowBlur = 0;
-      ctx.fillStyle = "#EDE3E8";
+      ctx.fillStyle = colors.main_white;
       ctx.font = "18px HelveticaNowText-Medium";
       ctx.textAlign = "center";
       ctx.fillText(ellipse.name, ellipse.x, ellipse.y + this.GLOBAL_PLANET_RADIUS);
