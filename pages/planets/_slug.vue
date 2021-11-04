@@ -13,8 +13,33 @@
     <!--else -> show the page-->
     <div v-else class="d-flex justify-space-between">
         <div class="chat">
-            <div class="titre">{{planet.name}}</div>
-            <div class="sous-titre">{{planet.theme}}</div>
+            <div class="d-flex justify-space-between" width="100%">
+                <div class="d-flex justify-center" style="margin-left: 2rem;">
+                    <v-tooltip bottom>
+                        <template v-slot:activator="{ on, attrs }">
+                            <v-icon
+                                v-bind="attrs"
+                                v-on="on"
+                                id="icon"
+                                @click="() => $router.push('/planets')"
+                                color="white"
+                                size="80"
+                            >mdi-keyboard-backspace
+                            </v-icon>
+                        </template>
+                        <span>Retour à la page planète</span>
+                    </v-tooltip>
+                </div>
+                
+                <div class="d-flex justify-center">
+                    <div>
+                        <div class="titre">{{planet.name}}</div>
+                        <div class="sous-titre">{{planet.theme}}</div>
+                    </div>
+                </div>
+                <div></div>
+            </div>
+            
             <div id="content">
                 <ul id="scrollableContent" v-if="messages.length">
                     <div id="isUp"></div>
@@ -65,6 +90,7 @@
 <script>
 
 export default {
+
     data: () => ({
         //var for the actual planet
         planet: {
@@ -127,7 +153,6 @@ export default {
                     this.isScrolledIntoView();
                 }, 1000);
             }
-            
         },
         //get messages by planetId 
         async getMessages(){
