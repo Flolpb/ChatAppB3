@@ -219,7 +219,7 @@ export default {
         async putScrollEvent(){
             const el = document.querySelector("#scrollableContent");
             if(el != null){
-                el.addEventListener("scroll", () => {this.onScrollEvent()});
+                el.addEventListener("scroll", () => {setTimeout(() => {this.onScrollEvent()}, 500)});
             }else{
                 setTimeout(() => {
                     this.putScrollEvent()
