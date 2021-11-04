@@ -20,17 +20,17 @@ export default {
     middleware: 'disconnect',
     methods: {
         async getData() {
-          const ref = await this.$fire.firestore.collection("test").doc("a4i0czW8SAsmuBtqpt2r");
-          const snapshot = await ref.get();
-          const doc = snapshot.data();
-          console.log(doc.name);
-          console.log(this.$store.state.localStorage.users);
+            const ref = await this.$fire.firestore.collection("test").doc("a4i0czW8SAsmuBtqpt2r");
+            const snapshot = await ref.get();
+            const doc = snapshot.data();
+            console.log(doc.name);
+            console.log(this.$store.state.localStorage.users);
         },
         async logout(){
-          await this.$fireModule.auth().signOut();
-          this.$store.dispatch(ACTIONS.LOGOUT);
-          this.$cookies.remove('uid');
-          this.$router.push('/login');
+            await this.$fireModule.auth().signOut();
+            this.$store.dispatch(ACTIONS.LOGOUT);
+            this.$cookies.remove('uid');
+            this.$router.push('/login');
         },
         async getProfile(){
             console.log(this.$store.state.auth.user);

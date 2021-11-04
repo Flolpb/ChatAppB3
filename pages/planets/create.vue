@@ -31,7 +31,12 @@
             solo
           ></v-text-field>
 
-          <CustomButton :title="'Créer une nouvelle planète'" :button-click="createPlanet" :disabled="!valid"/>
+          <v-progress-circular
+            v-if="spinner"
+            indeterminate
+            color="#272753"
+          ></v-progress-circular>
+          <CustomButton v-else :title="'Créer une nouvelle planète'" :button-click="createPlanet" :disabled="!valid"/>
         </v-form>
       </v-col>
     </v-row>
@@ -45,32 +50,74 @@
     components: {CustomTitle, CustomButton},
     middleware: 'disconnect',
     data: () => ({
-          valid: true,
-          planetRef: null,
-          planet: {
-            name: "",
-            nameRules: [(v) => !!v || "Le nom est requis"],
-            theme: "",
-            themeRules: [(v) => !!v || "Le thème est requis"],
-          },
+      spinner: false,
+      valid: true,
+      planetRef: null,
+      planet: {
+        name: "",
+        nameRules: [(v) => !!v || "Le nom est requis"],
+        theme: "",
+        themeRules: [(v) => !!v || "Le thème est requis"],
+      },
       }),
       methods: {
-          async createPlanet(){
+        async createPlanet(){
+          this.spinner = true;
+          try {
             this.valid = this.$refs.form.validate();
             if (this.valid) {
               await this.planetRef.set({
                 id: this.planetRef.id,
                 name: this.planet.name,
-                theme: this.planet.theme
+                theme: this.planet.theme,
+                skin: this.generatePlanetSkin(),
               }).then(r => {
                 this.$router.push("/planets/" + this.planetRef.id);
+
+                // Ligne commentée car on ne réinitialise pas le spinner au moment de la redirection (plus propre visuellement)
+                //this.spinner = false;
               });
             }
-          },
-          resetValidation() {
-            this.$refs.form.resetValidation();
-            this.valid = true;
+          } catch (e) {
+           this.spinner = false;
           }
+        },
+        resetValidation() {
+          this.$refs.form.resetValidation();
+          this.valid = true;
+        },
+        generatePlanetSkin() {
+          return {
+            color: this.getRandomColor(),
+            rings: this.generateRings(),
+          }
+        },
+        generateRings() {
+          let rings = [];
+          for (let i = 1; i <= 6; i++) {
+            if (this.random(0, i >= 3 ? i * 3 : i * 2) === 0) {
+              rings.push({
+                color: this.getRandomColor(),
+                rot: this.random(0,180),
+                lineWidth: this.random(8, 14),
+                celerity: this.random(1,3),
+              })
+            }
+          }
+          return rings;
+        },
+        random(min, max) {
+          return Math.floor(Math.random() * (max - min + 1) + min)
+        },
+        // Fonction de génération d'une couleur aléatoire
+        getRandomColor() {
+          var letters = '0123456789ABCDEF'.split('');
+          var color = '#';
+          for (var i = 0; i < 6; i++ ) {
+            color += letters[Math.round(Math.random() * 15)];
+          }
+          return color;
+        },
       },
       mounted(){
           this.planetRef = this.$fire.firestore.collection("planets").doc();
