@@ -88,7 +88,8 @@
         },
         generatePlanetSkin() {
           return {
-            color: this.getRandomColor(),
+            start_color: this.getRandomColor(),
+            end_color: this.getRandomColor(),
             rings: this.generateRings(),
           }
         },

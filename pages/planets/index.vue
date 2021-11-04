@@ -143,7 +143,8 @@ export default {
           name: this.planets[i].name,
           x: this.random(this.GLOBAL_PLANET_RADIUS, this.canvasData.width - this.GLOBAL_PLANET_RADIUS),
           y: this.random(this.GLOBAL_PLANET_RADIUS, this.canvasData.height - this.GLOBAL_PLANET_RADIUS),
-          color: this.planets[i].skin.color,
+          start_color: this.planets[i].skin.start_color,
+          end_color: this.planets[i].skin.end_color,
           rings: this.planets[i].skin.rings ? this.planets[i].skin.rings : [],
         };
 
@@ -185,9 +186,15 @@ export default {
     drawMainEllipse(ellipse) {
       let ctx = this.$refs.canvas.getContext('2d');
       ctx.beginPath();
-      ctx.shadowColor = ellipse.color;
+      ctx.shadowColor = ellipse.start_color;
       ctx.shadowBlur = 15;
-      ctx.fillStyle = ellipse.color;
+
+      // Création du gradient de la planète
+      let grd = ctx.createLinearGradient(ellipse.x - this.GLOBAL_PLANET_RADIUS, ellipse.y - this.GLOBAL_PLANET_RADIUS, ellipse.x + this.GLOBAL_PLANET_RADIUS, ellipse.y + this.GLOBAL_PLANET_RADIUS);
+      grd.addColorStop(0, ellipse.start_color);
+      grd.addColorStop(1, ellipse.end_color);
+      ctx.fillStyle = grd;
+
       // De 0 à 2PI, cercle trigonométrique
       ctx.ellipse(ellipse.x, ellipse.y, this.PLANET_RADIUS, this.PLANET_RADIUS, 0,  0, 2 * Math.PI);
       ctx.fill();
