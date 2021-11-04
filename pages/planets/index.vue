@@ -1,7 +1,18 @@
 <template>
-  <div class="text-center">
-    <SidebarMenu :items="sidebarItems" />
-      <canvas class="text-center" ref="canvas" id="canvas"></canvas>
+  <div>
+    <div v-if="loading" 
+    class="d-flex justify-center" style="margin-top: 40vh; transform: translateY(-50%);" >
+        <v-progress-circular
+              indeterminate
+              color="#ede3e8"
+              :size="200"
+              :width="10"
+            ></v-progress-circular>
+    </div>
+    <div class="text-center">
+      <SidebarMenu v-if="!loading" :items="sidebarItems"/>
+        <canvas class="text-center" ref="canvas" id="canvas"></canvas>
+    </div>
   </div>
 </template>
 
@@ -24,12 +35,10 @@ export default {
     GLOBAL_PLANET_RADIUS: 0,
     CANVAS_MARGIN_X: 0,
     FPS: 0,
+    loading: true,
   }),
-  async fetch() {
-    // Récupération des planètes
-    await this.$store.dispatch(ACTIONS_PLANET.GET_PLANETS);
-  },
   async mounted() {
+    await this.$store.dispatch(ACTIONS_PLANET.GET_PLANETS);
     // Radius de chaque rond / planète
     this.PLANET_RADIUS = 80;
     // Radius en X de chaque anneau
@@ -55,6 +64,7 @@ export default {
 
     // Copie du tableau enregistré dans le state
     this.planets = JSON.parse(JSON.stringify(this.$store.state.planets.planets));
+    this.loading = false;
     this.updateCanvasHeight();
 
     // Ajout d'un évènement onClick sur le canvas pour entrer dans une planète

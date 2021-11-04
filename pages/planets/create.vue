@@ -4,7 +4,7 @@
       <v-col cols="10" align="center" id="row-form">
         <CustomTitle
           :back-icon-click="() => this.$router.push('/planets')"
-          :back-message="'Retour à la iste des planètes'"
+          :back-message="'Retour à la liste des planètes'"
           :title="'Nouvelle planète'" />
         <v-form ref="form" v-model="valid" lazy-validation>
           <v-text-field
