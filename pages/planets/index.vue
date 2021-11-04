@@ -7,7 +7,8 @@
 
 <script>
 import SidebarMenu from "../../components/SidebarMenu";
-import {ACTIONS} from "../../store/planets";
+import {ACTIONS as ACTIONS_PLANET } from "../../store/planets";
+import {ACTIONS as ACTIONS_AUTH } from "../../store/auth";
 export default {
   name: "index",
   components: {SidebarMenu},
@@ -26,7 +27,7 @@ export default {
   }),
   async fetch() {
     // Récupération des planètes
-    await this.$store.dispatch(ACTIONS.GET_PLANETS);
+    await this.$store.dispatch(ACTIONS_PLANET.GET_PLANETS);
   },
   async mounted() {
     // Radius de chaque rond / planète
@@ -85,7 +86,7 @@ export default {
   methods: {
     async logout() {
       await this.$fireModule.auth().signOut();
-      this.$store.dispatch(ACTIONS.LOGOUT);
+      this.$store.dispatch(ACTIONS_AUTH.LOGOUT);
       this.$cookies.remove('uid');
       this.$router.push('/login');
     },
