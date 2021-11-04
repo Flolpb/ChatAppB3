@@ -47,15 +47,18 @@ export default {
       photoUrl: null,
     }),
     props: [
-        "uid",
-        "text",
-        "isUser",
-        "createdAt"
+      "id",
+      "uid",
+      "planetId",
+      "text",
+      "isUser",
+      "createdAt"
     ],
     metaInfo () {
       return {
         id: this.id,
         uid: this.uid,
+        planetId: this.planetId,
         text: this.text,
         isUser: this.isUser,
         createdAt: this.createdAt,
@@ -69,33 +72,34 @@ export default {
         if(doc != null){
           this.username = doc.displayName;
           this.photoUrl = doc.photoURL;
-          if(this.createdAt != null){
-            this.created = new Date(this.createdAt.seconds * 1000);
-            this.hours = this.created.getHours();
-            if(this.hours < 10){
-              this.hours = "0" + this.hours
-            }
-            this.minutes = this.created.getMinutes();
-            if(this.minutes < 10){
-              this.minutes = "0" + this.minutes
-            }
-            this.seconds = this.created.getSeconds();
-            if(this.seconds < 10){
-              this.seconds = "0" + this.seconds
-            }
-            this.time = this.hours + ":"+ this.minutes + ":" + this.seconds;
-            this.date = this.created.getDate();
-            if(this.date < 10){
-              this.date = "0" + this.date
-            }
-            this.month = this.created.getMonth();
-            this.month++;
-            if(this.month < 10){
-              this.month = "0" + this.month
-            }
-
-            this.date += "/" + this.month;
+        }
+        if(this.createdAt != null){
+          this.created = new Date(this.createdAt.seconds * 1000);
+          this.hours = this.created.getHours();
+          if(this.hours < 10){
+            this.hours = "0" + this.hours
           }
+          this.minutes = this.created.getMinutes();
+          if(this.minutes < 10){
+            this.minutes = "0" + this.minutes
+          }
+          this.seconds = this.created.getSeconds();
+          if(this.seconds < 10){
+            this.seconds = "0" + this.seconds
+          }
+          this.time = this.hours + ":"+ this.minutes + ":" + this.seconds;
+          this.date = this.created.getDate();
+          if(this.date < 10){
+            this.date = "0" + this.date
+          }
+          this.month = this.created.getMonth();
+          this.month++;
+          if(this.month < 10){
+            this.month = "0" + this.month
+          }
+
+          this.date += "/" + this.month;
+          console.log(this.time);
         }
         
       } 
