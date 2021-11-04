@@ -25,11 +25,8 @@ export default {
     CANVAS_MARGIN_X: 0,
     FPS: 0,
   }),
-  async fetch() {
-    // Récupération des planètes
-    await this.$store.dispatch(ACTIONS_PLANET.GET_PLANETS);
-  },
   async mounted() {
+    await this.$store.dispatch(ACTIONS.GET_PLANETS);
     // Radius de chaque rond / planète
     this.PLANET_RADIUS = 80;
     // Radius en X de chaque anneau

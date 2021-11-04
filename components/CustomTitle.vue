@@ -10,7 +10,7 @@
             v-on="on"
             id="icon"
             @click="backIconClick"
-            color="black"
+            :color="color ? color: 'black'"
             x-large
           >mdi-keyboard-backspace
           </v-icon>
@@ -25,7 +25,7 @@
 <script>
 export default {
   name: "CustomTitle",
-  props: ['title', 'backIconClick', 'backMessage']
+  props: ['title', 'backIconClick', 'backMessage', 'color']
 }
 </script>
 
