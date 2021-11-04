@@ -1,18 +1,26 @@
 <template>
 <div>
-    <p v-if="$fetchState.pending">Fetching Planet...</p>
-    <p v-else-if="$fetchState.error">An error occurred :(</p>
+    <div v-if="loading" class="d-flex justify-center" style="margin-top: 40vh;
+  transform: translateY(-50%);" >
+        <v-progress-circular
+              indeterminate
+              color="#ede3e8"
+              :size="200"
+              :width="10"
+            ></v-progress-circular>
+    </div>
     <div v-else class="d-flex justify-space-between">
         <div class="chat">
             <div class="titre">{{planet.name}}</div>
             <div class="sous-titre">{{planet.theme}}</div>
             <div id="content">
                 <ul id="scrollableContent" v-if="messages.length">
-                    <li v-for="(m, i) in messages"
-                    :key="i"
+                    <div id="isUp"></div>
+                    <li v-for="(m) in messages"
+                    :key="m.id"
                     exact>
-                        <UserMessage :uid="m.userId" :text="m.text" :createdAt="m.createdAt" :isUser="false" v-if="m.userId == $store.state.auth.user.uid"/>
-                        <UserMessage :uid="m.userId" :text="m.text" :createdAt="m.createdAt" :isUser="true" v-else />
+                        <UserMessage :uid.sync="m.userId" :text.sync="m.text" :createdAt.sync="m.createdAt" :isUser="false" v-if="m.userId == $store.state.auth.user.uid"/>
+                        <UserMessage :uid.sync="m.userId" :text.sync="m.text" :createdAt.sync="m.createdAt" :isUser="true" v-else />
                         <div style="height: 1rem;"></div>
                     </li>
                 </ul>
@@ -67,6 +75,11 @@ export default {
         messages: [],
         users: [],
         planetRef: null,
+        loading: true,
+        loadPercent: 0,
+        messagesLoaded: 20,
+        loadOnce: false,
+        canScroll: true,
     }),
     middleware: 'disconnect',
     methods: {
@@ -79,40 +92,67 @@ export default {
                 this.planet.theme = doc.theme;
                 this.message.planetId = this.planet.id;
                 if(document != null){
-                    document.title = this.planet.name + " - " + this.planet.theme;
+                    document.title = this.planet.name;
                 }
-                          
             }
             else{
                 this.$router.push('/');
             }
+        },
+        isScrolledIntoView() {
+            const le = document.querySelector("#isUp");
+            if(le != null){
+                const rect = le.getBoundingClientRect();
+                var elemTop = rect.top;
+                var elemBottom = rect.bottom;
+                var isVisible = (elemTop >= 0) && (elemBottom <= window.innerHeight);
+                return isVisible;
+            }else{
+                setTimeout(() => {
+                    this.isScrolledIntoView();
+                }, 1000);
+            }
+            
         },
         async getMessages(){
             const planetRef = await this.$fire.firestore.collection("planets").doc(this.$route.params.slug);
             const observer = planetRef.onSnapshot((doc) => {
                 const data = doc.data();
                 if(data != null){
-                    data.messages.sort(function(a,b){
-                        return new Date(b.createdAt) - new Date(a.createdAt);
-                    });
-                    let i = this.messages.length;
-                    data.messages.forEach((msg) => {
-                        if(i != 0){
-                            const id = this.messages.find((m) => {
-                                return m.id == msg.id;
-                            });
-                            if(id == undefined){
+                    if(data.messages != null){
+                        data.messages.sort(function(a,b){
+                            return new Date(b.createdAt) - new Date(a.createdAt);
+                        });
+                        let messagesLoad = data.messages.slice(data.messages.length - this.messagesLoaded, data.messages.length);
+                        let i = this.messages.length;
+                        messagesLoad.forEach((msg) => {
+                            if(i != 0){
+                                const id = this.messages.find((m) => {
+                                    return m.id == msg.id;
+                                });
+                                if(id == undefined){
+                                    let insert = false;
+                                    for(let j = 0; j < this.messages.length; j++){
+                                        if(!insert){
+                                            if(this.messages[j].createdAt > msg.createdAt){
+                                                this.messages.splice(j, 0, msg);
+                                                insert = true;
+                                            }else if(j == this.messages.length -1){
+                                                this.messages.push(msg);
+                                                insert = true;
+                                            }
+                                        }
+                                    }
+                                    i++;
+                                }
+                            }else{
                                 this.messages.push(msg);
                                 i++;
                             }
-                        }else{
-                            this.messages.push(msg);
-                            i++;
-                        }
-                    })                
+                        });
+                    } 
                 }
-            })
-            
+            });
         },
         async sendMessage(){
             this.$fire.firestore.collection("planets").doc(this.$route.params.slug).update({
@@ -139,9 +179,11 @@ export default {
         },
         scrollToBottom() {
             if(this.$el){
-                const el = this.$el.querySelector("#scrollableContent");
-                if (el) {
-                    el.scrollTop = 9999999999 + el.scrollHeight;
+                if(this.canScroll){
+                    const el = this.$el.querySelector("#scrollableContent");
+                    if (el) {
+                        el.scrollTop = 9999999999 + el.scrollHeight;
+                    }
                 }
             }
         },
@@ -173,6 +215,24 @@ export default {
                     }
                 });
             });
+        },
+        async putScrollEvent(){
+            const el = document.querySelector("#scrollableContent");
+            if(el != null){
+                el.addEventListener("scroll", () => {this.onScrollEvent()});
+            }else{
+                setTimeout(() => {
+                    this.putScrollEvent()
+                }, 1000);
+            }
+        },
+        onScrollEvent(){
+            if(this.isScrolledIntoView()){
+                this.canScroll = false;
+                this.messagesLoaded += 15;
+                this.getMessages();
+                setTimeout(() => {this.canScroll = true}, 1000);
+            }
         },
         async addUserConnected(status){
             const usersStatus = await this.$fire.firestore.collection('usersStatut');
@@ -221,12 +281,19 @@ export default {
         await this.getUserConnected().then(() => {
             window.addEventListener('blur', () => {this.addUserConnected("away")});
             window.addEventListener('focus', () => {this.addUserConnected("connected")});
-        })
+            this.loading = false;
+        });
+        await this.putScrollEvent();
     },
     updated(){
+        setTimeout(() =>{
+            if(!this.loadOnce){
+                this.loadOnce = true;
+            }
+        }, 1000);
         setTimeout(() => {
             this.scrollToBottom();
-        }, 500)
+        }, 500);
     },
     async fetch() {
         await this.getMessages();
