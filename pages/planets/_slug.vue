@@ -22,7 +22,9 @@
                     :key="m.id"
                     exact>
                         <!--Component for the Messages -->
-                        <UserMessage :uid.sync="m.userId" :text.sync="m.text" :createdAt.sync="m.createdAt" :isUser="m.userId != $store.state.auth.user.uid" />
+                        <transition name="slide-fade">
+                            <UserMessage :uid.sync="m.userId" :text.sync="m.text" :createdAt.sync="m.createdAt" :isUser="m.userId != $store.state.auth.user.uid" />
+                        </transition>
                         
                         <div style="height: 1rem;"></div>
                     </li>
@@ -337,7 +339,7 @@ export default {
         await this.getMessages();
         await this.getUserConnected();
     },
-    watchQuery: true,
+    watchQuery: true
 }
 </script>
 
@@ -375,4 +377,17 @@ export default {
     li{
         list-style-type: none;
     }
+
+    .slide-fade-enter-active {
+        transition: all .5s ease;
+    }
+    .slide-fade-leave-active {
+        transition: all 0s ease;
+    }
+    .slide-fade-enter, .slide-fade-leave-to
+    /* .slide-fade-leave-active below version 2.1.8 */ {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+
 </style>

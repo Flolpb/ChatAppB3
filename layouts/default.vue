@@ -1,7 +1,7 @@
 <template>
   <v-app class="section">
     <v-main>
-      <Nuxt />
+      <transition name="slide-fade"><Nuxt /></transition>
     </v-main>
   </v-app>
 </template>
@@ -40,4 +40,17 @@ export default {
     background: -webkit-linear-gradient(180deg, #272753 0%, rgba(27, 27, 58, 0.79) 53.54%);
     background: linear-gradient(180deg, #272753 0%, rgba(27, 27, 58, 0.79) 53.54%);
   }
+
+  .slide-fade-enter-active {
+      transition: all .8s ease;
+  }
+  .slide-fade-leave-active {
+      transition: all 0s ease;
+  }
+  .slide-fade-enter, .slide-fade-leave-to
+  /* .slide-fade-leave-active below version 2.1.8 */ {
+      transform: translateY(-100px);
+      opacity: 0;
+  }
+
 </style>
