@@ -219,6 +219,7 @@ export default {
       ctx.beginPath();
       ctx.shadowColor = "";
       ctx.shadowBlur = 0;
+      ctx.fillStyle = "#ffffff";
       ctx.font = "20px Montserrat";
       ctx.textAlign = "center";
       ctx.fillText(ellipse.name, ellipse.x, ellipse.y + this.GLOBAL_PLANET_RADIUS);
