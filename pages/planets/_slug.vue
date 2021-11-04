@@ -1,7 +1,8 @@
 <template>
 <div>
-    <div v-if="loading" class="d-flex justify-center" style="margin-top: 40vh;
-  transform: translateY(-50%);" >
+    <!--If datas are loading -> show a circular progress-->
+    <div v-if="loading" 
+    class="d-flex justify-center" style="margin-top: 40vh; transform: translateY(-50%);" >
         <v-progress-circular
               indeterminate
               color="#ede3e8"
@@ -9,6 +10,7 @@
               :width="10"
             ></v-progress-circular>
     </div>
+    <!--else -> show the page-->
     <div v-else class="d-flex justify-space-between">
         <div class="chat">
             <div class="titre">{{planet.name}}</div>
@@ -19,8 +21,9 @@
                     <li v-for="(m) in messages"
                     :key="m.id"
                     exact>
-                        <UserMessage :uid.sync="m.userId" :text.sync="m.text" :createdAt.sync="m.createdAt" :isUser="false" v-if="m.userId == $store.state.auth.user.uid"/>
-                        <UserMessage :uid.sync="m.userId" :text.sync="m.text" :createdAt.sync="m.createdAt" :isUser="true" v-else />
+                        <!--Component for the Messages -->
+                        <UserMessage :uid.sync="m.userId" :text.sync="m.text" :createdAt.sync="m.createdAt" :isUser="m.userId != $store.state.auth.user.uid" />
+                        
                         <div style="height: 1rem;"></div>
                     </li>
                 </ul>
@@ -37,7 +40,7 @@
                 <v-btn color="success" class="mr-4" @click="sendMessage">
                     Send
                 </v-btn>
-                <v-btn @click="scrollToBottom">Scroll</v-btn>
+                <v-btn @click="scrollToBottom">Go bottom</v-btn>
             </v-form>
         </div>
         <div class="colonie">
@@ -47,8 +50,8 @@
                 <div v-for="(u, i) in users"
                 :key="i"
                 exact>
-                <UserConnected :id="u[0]" :uid="u[1].userId" :pid="u[1].planetId" :status="u[1].connected"/>
-                <hr />
+                    <UserConnected :id="u[0]" :uid="u[1].userId" :pid="u[1].planetId" :status="u[1].connected"/>
+                    <hr />
                 </div>
             </div>
         </div>
@@ -61,28 +64,36 @@
 
 export default {
     data: () => ({
+        //var for the actual planet
         planet: {
             id: null,
             name: null,
             theme: null,
         },
+        //var for the actual message
         message: {
             text: "",
             userId: "",
             planetId: "",
             createdAt: '',
         },
+        //stock all the messages
         messages: [],
+        //stock the connected users
         users: [],
         planetRef: null,
+        //test if the data is loading
         loading: true,
-        loadPercent: 0,
+        //the nb of messages loaded
         messagesLoaded: 20,
         loadOnce: false,
+        //if the user is scrolling, dont scroll to bottom
         canScroll: true,
     }),
+    //we have to be connected to access this page
     middleware: 'disconnect',
     methods: {
+        //get the current planet and change the doc title
         async getPlanet(){
             this.planetRef = await this.$fire.firestore.collection("planets").doc(this.$route.params.slug);
             const snapshot = await this.planetRef.get();
@@ -99,6 +110,7 @@ export default {
                 this.$router.push('/');
             }
         },
+        //If the user is at the top of the scroll message block return true or false
         isScrolledIntoView() {
             const le = document.querySelector("#isUp");
             if(le != null){
@@ -108,35 +120,46 @@ export default {
                 var isVisible = (elemTop >= 0) && (elemBottom <= window.innerHeight);
                 return isVisible;
             }else{
+                //if the element is not loaded, report the function
                 setTimeout(() => {
                     this.isScrolledIntoView();
                 }, 1000);
             }
             
         },
+        //get messages by planetId 
         async getMessages(){
+            // get planet on firestore
             const planetRef = await this.$fire.firestore.collection("planets").doc(this.$route.params.slug);
+            // whenever a data is changed in the planetref:
             const observer = planetRef.onSnapshot((doc) => {
                 const data = doc.data();
                 if(data != null){
                     if(data.messages != null){
+                        //try msg by creation time
                         data.messages.sort(function(a,b){
                             return new Date(b.createdAt) - new Date(a.createdAt);
                         });
+                        //create a copy of messages with just the last "messagesLoaded" count
                         let messagesLoad = data.messages.slice(data.messages.length - this.messagesLoaded, data.messages.length);
                         let i = this.messages.length;
+                        
                         messagesLoad.forEach((msg) => {
                             if(i != 0){
+                                //know if the msg is already in the array
                                 const id = this.messages.find((m) => {
                                     return m.id == msg.id;
                                 });
                                 if(id == undefined){
+                                    //bool for know if the current msg is inserted
                                     let insert = false;
                                     for(let j = 0; j < this.messages.length; j++){
                                         if(!insert){
+                                            //if the current message is before a item of the stocked messages
                                             if(this.messages[j].createdAt > msg.createdAt){
                                                 this.messages.splice(j, 0, msg);
                                                 insert = true;
+                                                //else if this is the last message of the stocked msg
                                             }else if(j == this.messages.length -1){
                                                 this.messages.push(msg);
                                                 insert = true;
@@ -146,6 +169,7 @@ export default {
                                     i++;
                                 }
                             }else{
+                                //if it is the first msg
                                 this.messages.push(msg);
                                 i++;
                             }
@@ -154,6 +178,7 @@ export default {
                 }
             });
         },
+        //when the msg is sent, change the value in the database
         async sendMessage(){
             this.$fire.firestore.collection("planets").doc(this.$route.params.slug).update({
                 messages: this.$fireModule.firestore.FieldValue.arrayUnion({
@@ -177,19 +202,22 @@ export default {
             this.message.createdAt = "";
 
         },
+        //scroll to the bottom of the scroll msg block
         scrollToBottom() {
             if(this.$el){
                 if(this.canScroll){
                     const el = this.$el.querySelector("#scrollableContent");
                     if (el) {
-                        el.scrollTop = 9999999999 + el.scrollHeight;
+                        el.scrollTop = el.scrollHeight;
                     }
                 }
             }
         },
+        //get the users connected
         async getUserConnected(){
             const usersStatus = await this.$fire.firestore.collection('usersStatut');
             let i = this.users.length;
+            //observe when a user change their status
             const observer = await usersStatus.where('planetId', '==', this.planet.id).onSnapshot((querySnap) => {
                 querySnap.forEach((doc) => {
                     const docData = doc.data();
@@ -216,6 +244,7 @@ export default {
                 });
             });
         },
+        //put scroll event at the scroll block messages
         async putScrollEvent(){
             const el = document.querySelector("#scrollableContent");
             if(el != null){
@@ -226,6 +255,7 @@ export default {
                 }, 1000);
             }
         },
+        //When scrolling at the scroll block msg, if the user go to the top => load more messages
         onScrollEvent(){
             if(this.isScrolledIntoView()){
                 this.canScroll = false;
@@ -234,6 +264,7 @@ export default {
                 setTimeout(() => {this.canScroll = true}, 1000);
             }
         },
+        //check if the user is connected or not and update the database with
         async addUserConnected(status){
             const usersStatus = await this.$fire.firestore.collection('usersStatut');
             const snapshot = await usersStatus.get();
@@ -261,6 +292,7 @@ export default {
                     } 
                 });
             }
+            //if the user is not subscribe at the planet
             if(!achieve){
                 const newUserRef = await this.$fire.firestore.collection('usersStatut').doc();
                 newUserRef.set({
@@ -274,17 +306,22 @@ export default {
         }
     },
     async mounted(){
+        //on récupère l'id de la planète via la route
         this.planet.id = this.$route.params.slug;
+        //on récupère les données 
         await this.getPlanet();
         await this.getMessages();
+        //on met l'id de l'user avec le user enregistré sur le store
         this.message.userId = this.$store.state.auth.user.uid;
         await this.getUserConnected().then(() => {
             window.addEventListener('blur', () => {this.addUserConnected("away")});
             window.addEventListener('focus', () => {this.addUserConnected("connected")});
+            //loading bar set to false
             this.loading = false;
         });
         await this.putScrollEvent();
     },
+    //if the DOM is updated
     updated(){
         setTimeout(() =>{
             if(!this.loadOnce){
@@ -295,6 +332,7 @@ export default {
             this.scrollToBottom();
         }, 500);
     },
+    //load data before the page is mounted
     async fetch() {
         await this.getMessages();
         await this.getUserConnected();
