@@ -39,7 +39,6 @@
                 </div>
                 <div></div>
             </div>
-            
             <div id="content">
                 <ul id="scrollableContent" v-if="messages.length">
                     <div id="isUp"></div>
@@ -58,27 +57,29 @@
 
 
             <v-form ref="form" lazy-validation>
-                <v-text-field
+                <v-textarea
+                    style="margin-left: 2rem;"
+                    rows="1"
                     v-model="message.text"
-                    label="Message"
-                    required
-                ></v-text-field>
-
-                <v-btn color="success" class="mr-4" @click="sendMessage">
-                    Send
-                </v-btn>
-                <v-btn @click="scrollToBottom">Go bottom</v-btn>
+                    :append-outer-icon="message ? 'mdi-send' : 'mdi-microphone'"
+                    filled
+                    clear-icon="mdi-close-circle"
+                    clearable
+                    type="text"
+                    @click:append-outer="sendMessage"
+                    @click:clear="clearMessage"
+                ></v-textarea>
             </v-form>
         </div>
+        <div></div>
         <div class="colonie">
             <div class="titre">Colonie</div>
             <hr />
             <div>
-                <div v-for="(u, i) in users"
-                :key="i"
+                <div v-for="u in users"
+                :key="u[0]"
                 exact>
                     <UserConnected :id="u[0]" :uid="u[1].userId" :pid="u[1].planetId" :status="u[1].connected"/>
-                    <hr />
                 </div>
             </div>
         </div>
@@ -121,6 +122,9 @@ export default {
     //we have to be connected to access this page
     middleware: 'disconnect',
     methods: {
+        clearMessage(){
+            this.message.text = "";
+        },
         //get the current planet and change the doc title
         async getPlanet(){
             this.planetRef = await this.$fire.firestore.collection("planets").doc(this.$route.params.slug);
@@ -327,9 +331,14 @@ export default {
                     planetId: this.message.planetId,
                     connected: status,
                 });
+                await this.$fire.firestore.collection('users').doc(this.message.userId).update({
+                    planets: this.$fireModule.firestore.FieldValue.arrayUnion(this.message.planetId),
+                });
+                
+                
             }
 
-            document.title = this.planet.name + " - " + this.planet.theme;
+            document.title = this.planet.name;
         }
     },
     async mounted(){
@@ -343,6 +352,7 @@ export default {
         await this.getUserConnected().then(() => {
             window.addEventListener('blur', () => {this.addUserConnected("away")});
             window.addEventListener('focus', () => {this.addUserConnected("connected")});
+            this.addUserConnected("connected");
             //loading bar set to false
             this.loading = false;
         });
@@ -380,7 +390,8 @@ export default {
     }
 
     .colonie{
-        min-width: 40vw;
+        margin-right: 2vw;
+        min-width: 35vw;
     }
 
     .sous-titre{
@@ -413,6 +424,11 @@ export default {
     /* .slide-fade-leave-active below version 2.1.8 */ {
         transform: translateY(-50px);
         opacity: 0;
+    }
+
+    .input-text{
+        background: #272753;
+        color: white;
     }
 
 </style>

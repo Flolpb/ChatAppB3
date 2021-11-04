@@ -27,7 +27,7 @@ export const actions = {
   async getPlanetById({commit}, id){
     const ref = await this.$fire.firestore.collection("planets").doc(id)
     const snapshot = await ref.get();
-    let data = snapshot.data();
+    const data = snapshot.data();
     commit("GET_PLANET_BY_ID", data);
   },
 }
