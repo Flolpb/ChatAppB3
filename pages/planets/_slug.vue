@@ -1,5 +1,11 @@
 <template>
 <div>
+    <v-icon
+        large
+        @click="home"
+      >
+        mdi-chevron-left
+      </v-icon>
     <p v-if="$fetchState.pending">Fetching Planet...</p>
     <p v-else-if="$fetchState.error">An error occurred :(</p>
     <div v-else class="d-flex justify-space-between">
@@ -211,7 +217,10 @@ export default {
             }
 
             document.title = this.planet.name + " - " + this.planet.theme;
-        }
+        },
+        async home () {
+        this.$router.push("/planets");
+      },
     },
     async mounted(){
         this.planet.id = this.$route.params.slug;

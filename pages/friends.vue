@@ -20,8 +20,8 @@
       ></v-text-field>
     </v-toolbar>
     <div>
-    <p v-if="$fetchState.pending">Fetching Friends...</p>
-    <p v-else-if="$fetchState.error">An error occurred :(</p>
+    <!--<p v-if="$fetchState.pending">Fetching Friends...</p>
+    <p v-else-if="$fetchState.error">An error occurred :(</p>-->
       <ul>
         <li v-for="(f, i) in friends"
           :key="i"
