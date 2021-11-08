@@ -41,6 +41,7 @@ export default {
   async mounted() {
     // Récupération des planètes
     await this.$store.dispatch(ACTIONS_PLANET.GET_PLANETS);
+    document.title = "Liste des planètes"
 
     // Radius de chaque rond / planète
     this.PLANET_RADIUS = 80;
