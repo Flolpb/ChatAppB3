@@ -22,6 +22,13 @@
         <CustomTitle :title="'Paramètres'" :fontSize="3" :marginBottom="1" />
         <CustomSwitch :name="'animation'" :initial-value="animation" @update="onSwitchUpdate" :label="'Animations activées'" />
         <CustomSwitch :name="'planetNames'" :initial-value="planetNames" @update="onSwitchUpdate" :label="'Nom des planètes affichées'" />
+
+        <h2>Liste Des planètes de l'utilisateur</h2>
+        <div v-for="(p, i) in planets"
+             :key="i"
+             exact>
+          <UserPlanet :planetId="p" />
+        </div>
       </v-col>
     </v-row>
   </v-container>
@@ -31,18 +38,34 @@ import {ACTIONS} from "../store/auth.js";
 import CustomTitle from "../components/CustomTitle";
 import CustomSwitch from "../components/CustomSwitch";
 import BackArrow from "../components/BackArrow";
+import UserPlanet from "../components/UserPlanet";
 export default {
   components: {BackArrow, CustomSwitch},
   middleware: 'disconnect',
   data: () => ({
     animation: null,
     planetNames: null,
+    planets: null,
   }),
   mounted() {
+    this.getUserPlanets();
     this.animation = this.$store.state.auth.user.parameters.animation;
     this.planetNames = this.$store.state.auth.user.parameters.planetNames;
   },
   methods: {
+    async getUserPlanets() {
+      if(this.user){
+        const ref = await this.$fire.firestore.collection("users").doc(this.user);
+        const snapshot = await ref.get();
+        const doc = snapshot.data();
+        this.planets = doc.planets;
+      }else{
+        this.user = this.$store.state.auth.user.uid;
+        setTimeout(() => {
+          this.getData();
+        }, 100);
+      }
+    },
     logout() {
       this.$store.dispatch(ACTIONS.LOGOUT);
       this.$router.push('/login');
@@ -64,7 +87,7 @@ export default {
     redirect() {
       this.$router.push('/planets')
     }
-  },
+  }
 }
 </script>
 

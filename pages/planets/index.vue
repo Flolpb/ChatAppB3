@@ -36,11 +36,11 @@ export default {
     GLOBAL_PLANET_RADIUS: 0,
     CANVAS_MARGIN_X: 0,
     FPS: 0,
-    loading: true,
   }),
   async mounted() {
     // Récupération des planètes
     await this.$store.dispatch(ACTIONS_PLANET.GET_PLANETS);
+    document.title = "Liste des planètes"
 
     // Radius de chaque rond / planète
     this.PLANET_RADIUS = 80;
@@ -67,7 +67,6 @@ export default {
 
     // Copie du tableau enregistré dans le state
     this.planets = JSON.parse(JSON.stringify(this.$store.state.planets.planets));
-    this.loading = false;
     this.updateCanvasHeight();
 
     // Ajout d'un évènement onClick sur le canvas pour entrer dans une planète

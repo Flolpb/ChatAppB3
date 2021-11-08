@@ -1,9 +1,9 @@
 <template>
     <div v-if="isUser" class="d-flex justify-start">
       <div>
-        <img style="margin-left: 4px; margin-right: 4px; margin-top: 4px;border-radius: 50%; height: 2rem;" :src="photoUrl" />
+        <img style="margin-left: 4px; margin-right: 1rem; margin-top: 0px;border-radius: 50%; height: 2rem;" :src="photoUrl" />
       </div>
-      <div>
+      <div style="max-width: 50%">
         <div class="message">
           <div class="text">
             {{text}}
@@ -17,8 +17,8 @@
       </div>
     </div>
     <div class="d-flex justify-end" v-else>
-      <div>
-        <div class="message">
+      <div style="max-width: 50%">
+        <div class="message" >
           <div class="text">
             {{text}}
           </div>
@@ -28,7 +28,7 @@
         </div>
       </div>
       <div>
-        <img style="border-radius: 50%; height: 2rem; margin-left: 4px; margin-right: 4px;margin-top: 4px;" :src="$store.state.auth.user.photoURL" />
+        <img style="border-radius: 50%; height: 2rem; margin-left: 1rem; margin-right: 4px;margin-top: 0px;" :src="$store.state.auth.user.photoURL" />
       </div>
     </div>
 </template>
@@ -114,12 +114,12 @@ export default {
 <style scoped lang="scss">
   .message{
     background: #EDE3E8;
-    border-radius: 8%;
+    border-radius: 15px;
   }
 
   .text{
     color: black;
-    padding: 0.5rem 2rem 0.5rem 2rem;
+    padding: 0.5rem 1rem 0.5rem 1rem;
   }
 
 </style>
