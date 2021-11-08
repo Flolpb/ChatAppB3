@@ -340,6 +340,7 @@ export default {
         await this.getMessages();
         //on met l'id de l'user avec le user enregistré sur le store
         this.message.userId = this.$store.state.auth.user.uid;
+        this.addUserConnected("connected");
         await this.getUserConnected().then(() => {
             window.addEventListener('blur', () => {this.addUserConnected("away")});
             window.addEventListener('focus', () => {this.addUserConnected("connected")});
