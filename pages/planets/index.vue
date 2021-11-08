@@ -88,9 +88,7 @@ export default {
   },
   methods: {
     async logout() {
-      // await this.$fireModule.auth().signOut();
       this.$store.dispatch(ACTIONS_AUTH.LOGOUT);
-      // this.$cookies.remove('uid');
       this.$router.push('/login');
     },
     redirectToPlanet(planetId) {

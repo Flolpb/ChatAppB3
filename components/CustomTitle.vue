@@ -1,31 +1,21 @@
 <template>
   <div>
-    <h1 id="title">
-
-      <v-tooltip bottom>
-        <template v-slot:activator="{ on, attrs }">
-          <v-icon
-            v-if="backIconClick"
-            v-bind="attrs"
-            v-on="on"
-            id="icon"
-            @click="backIconClick"
-            :color="color ? color: 'black'"
-            x-large
-          >mdi-keyboard-backspace
-          </v-icon>
-        </template>
-        <span>{{ backMessage }}</span>
-      </v-tooltip>
+    <h1 id="title" :style="
+      'font-size:'+ (fontSize ? fontSize : 5) + 'rem; ' +
+      'margin-bottom:'+ (marginBottom ? marginBottom : 4) + 'rem;'
+    ">
+      <BackArrow :back-icon-click="backIconClick" :back-message="backMessage" />
       {{ title }}
     </h1>
   </div>
 </template>
 
 <script>
+import BackArrow from "./BackArrow";
 export default {
   name: "CustomTitle",
-  props: ['title', 'backIconClick', 'backMessage', 'color']
+  components: {BackArrow},
+  props: ['title', 'backIconClick', 'backMessage', 'color', 'fontSize', 'marginBottom']
 }
 </script>
 
@@ -33,8 +23,6 @@ export default {
   #title {
     color: black;
     font-family: 'HelveticaNowText-Medium', sans-serif;
-    font-size: 5rem;
-    margin-bottom: 4rem;
   }
   #icon {
     margin-right: 2em;

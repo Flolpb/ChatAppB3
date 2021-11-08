@@ -43,6 +43,7 @@ export default {
         this.provider = new this.$fireModule.auth.GoogleAuthProvider();
         this.$fireModule.auth().signInWithPopup(this.provider).then(
           (result) => {
+            console.log(result)
             const newUser = {
               email: result.user.email,
               displayName: result.user.displayName,
