@@ -36,9 +36,6 @@
 export default {
   name: "SidebarMenu",
   props: ['items',],
-  mounted() {
-    console.log(this.items)
-  }
 }
 </script>
 

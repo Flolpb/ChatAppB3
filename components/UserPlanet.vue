@@ -16,7 +16,8 @@ export default {
     methods: {
       async getData(){
         await this.$store.dispatch(ACTIONS.GET_PLANET_BY_ID, this.planetId);
-        this.planetName = this.$store.state.planets.planet.name;
+        this.planetName = JSON.parse(JSON.stringify(this.$store.state.planets.planet.name));
+        console.log(this.planetName);
       } 
     },
     async mounted () {

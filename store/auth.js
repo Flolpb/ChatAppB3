@@ -16,7 +16,7 @@ export const mutations = {
         state.user.photoURL = null,
         state.user.uid = null,
         state.login = false
-    }
+    },
 }
 
 export const ACTIONS = {
@@ -25,11 +25,18 @@ export const ACTIONS = {
 }
 
 export const actions = {
-    login({commit}, user){
-        commit("LOGIN", user);
+    async login({commit}, user){
+      const userRef = await this.$fire.firestore.collection("users").doc(user.uid);
+      userRef.set({
+        displayName: user.displayName,
+        email: user.email,
+        photoURL: user.photoURL,
+      });
+      commit("LOGIN", user);
     },
-    logout({commit}){
-        commit("LOGOUT");
+    async logout({commit}){
+      await this.$fireModule.auth().signOut();
+      this.$cookies.remove('uid');
+      commit("LOGOUT");
     },
-
 }

@@ -1,6 +1,7 @@
 export const ACTIONS = {
   GET_PLANETS: 'planets/getPlanets',
   GET_PLANET_BY_ID: 'planets/getPlanetById',
+  ADD_PLANET: 'planets/addPlanet',
 }
 
 export const state = () => ({
@@ -30,4 +31,10 @@ export const actions = {
     const data = snapshot.data();
     commit("GET_PLANET_BY_ID", data);
   },
+  async addPlanet({commit}, planet) {
+    let ref = this.$fire.firestore.collection("planets").doc();
+    planet.id = ref.id;
+    await ref.set(planet)
+    return planet.id;
+  }
 }
