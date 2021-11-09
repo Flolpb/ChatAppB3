@@ -114,7 +114,7 @@ export default {
         //test if the data is loading
         loading: true,
         //the nb of messages loaded
-        messagesLoaded: 20,
+        messagesLoaded: 10,
         loadOnce: false,
         //if the user is scrolling, dont scroll to bottom
         canScroll: true,
@@ -240,7 +240,7 @@ export default {
                 if(this.canScroll){
                     const el = this.$el.querySelector("#scrollableContent");
                     if (el) {
-                        el.scrollTop = el.scrollHeight;
+                        el.scrollTop = 9999 + el.scrollHeight;
                     }
                 }
             }
@@ -289,9 +289,9 @@ export default {
         },
         //When scrolling at the scroll block msg, if the user go to the top => load more messages
         onScrollEvent(){
-            if(this.isScrolledIntoView()){
+            if(this.isScrolledIntoView() && this.canScroll){
+                this.messagesLoaded += 10;
                 this.canScroll = false;
-                this.messagesLoaded += 15;
                 this.getMessages();
                 setTimeout(() => {this.canScroll = true}, 1000);
             }
