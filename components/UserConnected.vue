@@ -31,13 +31,16 @@ export default {
     },
     methods: {
       async getData(){
-        const userRef = await this.$fire.firestore.collection("users").doc(this.uid);
-        const snapshot = await userRef.get();
-        const doc = snapshot.data();
-        if(doc != null){
-            this.username = doc.displayName;
-            this.photoUrl = doc.photoURL;
+        if(this.uid != null){
+          const userRef = await this.$fire.firestore.collection("users").doc(this.uid);
+          const snapshot = await userRef.get();
+          const doc = snapshot.data();
+          if(doc != null){
+              this.username = doc.displayName;
+              this.photoUrl = doc.photoURL;
+          }
         }
+        
       } 
     },
     async mounted () {

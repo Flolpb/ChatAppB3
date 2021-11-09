@@ -1,35 +1,57 @@
 <template>
-    <div v-if="isUser" class="d-flex justify-start">
-      <div>
-        <img style="margin-left: 4px; margin-right: 1rem; margin-top: 0px;border-radius: 50%; height: 2rem;" :src="photoUrl" />
-      </div>
-      <div style="max-width: 50%">
-        <div class="message">
-          <div class="text">
-            {{text}}
+    <div v-if="isUser && isIntersecting">
+    <transition name="slide-fade">
+      <div v-if="animate" class="d-flex justify-start">
+        <div>
+          <img style="margin-left: 4px; margin-right: 1rem; margin-top: 0px;border-radius: 50%; height: 2rem;" :src="photoUrl" />
+        </div>
+        <div style="max-width: 50%">
+          <div class="message">
+            <div class="text">
+              {{text}}
+            </div>
+          </div>
+          <div class="d-flex justify-space-between">
+            <div>{{username}}</div>
+            <div style="width: 2rem;"></div>
+            <div>{{time}} {{date}}</div>
           </div>
         </div>
-        <div class="d-flex justify-space-between">
-          <div>{{username}}</div>
-          <div style="width: 2rem;"></div>
-          <div>{{time}} {{date}}</div>
-        </div>
       </div>
+    </transition>
+    </div>
+    <div v-else-if="isIntersecting">
+      <transition name="slide-fade">
+        <div v-if="animate" class="d-flex justify-end">
+          <div style="max-width: 50%">
+            <div class="message" >
+              <div class="text">
+                {{text}}
+              </div>
+            </div>
+            <div class="d-flex justify-end">
+              <div>{{time}} {{date}}</div>
+            </div>
+          </div>
+          <div>
+            <img style="border-radius: 50%; height: 2rem; margin-left: 1rem; margin-right: 4px;margin-top: 0px;" :src="$store.state.auth.user.photoURL" />
+          </div>
+        </div>
+      </transition>
+    </div>
+    <div class="d-flex justify-start" v-else-if="isUser">
+      <v-progress-circular v-intersect="onIntersect"
+        indeterminate
+        color="#ede3e8"
+      >
+      </v-progress-circular>
     </div>
     <div class="d-flex justify-end" v-else>
-      <div style="max-width: 50%">
-        <div class="message" >
-          <div class="text">
-            {{text}}
-          </div>
-        </div>
-        <div class="d-flex justify-end">
-          <div>{{time}} {{date}}</div>
-        </div>
-      </div>
-      <div>
-        <img style="border-radius: 50%; height: 2rem; margin-left: 1rem; margin-right: 4px;margin-top: 0px;" :src="$store.state.auth.user.photoURL" />
-      </div>
+      <v-progress-circular v-intersect="onIntersect"
+        indeterminate
+        color="#ede3e8"
+      >
+      </v-progress-circular>
     </div>
 </template>
 
@@ -45,6 +67,8 @@ export default {
       date: null,
       month: null,
       photoUrl: null,
+      isIntersecting: false,
+      animate: false,
     }),
     props: [
       "id",
@@ -65,6 +89,12 @@ export default {
       }
     },
     methods: {
+      onIntersect (entries, observer) {
+        setTimeout(() => {
+          this.isIntersecting = entries[0].isIntersecting
+          this.animate = this.isIntersecting
+        }, 100)
+      },
       async getData(){
         const userRef = await this.$fire.firestore.collection("users").doc(this.uid);
         const snapshot = await userRef.get();
@@ -121,5 +151,16 @@ export default {
     color: black;
     padding: 0.5rem 1rem 0.5rem 1rem;
   }
+  .slide-fade-enter-active {
+    transition: all .3s ease;
+  }
+  .slide-fade-leave-active {
+    transition: all .8s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+  }
+  .slide-fade-enter, .slide-fade-leave-to
+  /* .slide-fade-leave-active below version 2.1.8 */ {
+    transform: translateX(50px);
+    opacity: 0;
+  } 
 
 </style>
