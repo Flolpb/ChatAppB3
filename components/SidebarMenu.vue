@@ -17,7 +17,7 @@
           v-for="item in items"
           :key="item.title"
           :to="item.route && (item.route)"
-          @click="item.click() && (item.click())"
+          @click="item && (item.click())"
           link
           class="text-left custom-list-item"
         >

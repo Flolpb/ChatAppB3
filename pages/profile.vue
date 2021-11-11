@@ -20,8 +20,8 @@
         </div>
 
         <CustomTitle :title="'Paramètres'" :fontSize="3" :marginBottom="1" />
-        <CustomSwitch :name="'animation'" :label="'Animations activées'" :initial-value="animation ? animation : this.$store.state.auth.user.parameters.animation" @update="onSwitchUpdate" />
-        <CustomSwitch :name="'planetNames'" :label="'Nom des planètes affichées'" :initial-value="planetNames ? planetNames : this.$store.state.auth.user.parameters.planetNames" @update="onSwitchUpdate" />
+        <CustomSwitch :name="'animation'" :label="'Animations activées'" :initial-value="animation" @update="onSwitchUpdate" />
+        <CustomSwitch :name="'planetNames'" :label="'Nom des planètes affichées'" :initial-value="planetNames" @update="onSwitchUpdate" />
 
         <h2>Liste Des planètes de l'utilisateur</h2>
         <div v-for="(p, i) in planets"
@@ -49,6 +49,8 @@ export default {
   }),
   async mounted() {
     await this.getUserPlanets();
+    this.animation = this.$store.state.auth.user.parameters.animation;
+    this.planetNames = this.$store.state.auth.user.parameters.planetNames;
   },
   methods: {
     async getUserPlanets() {

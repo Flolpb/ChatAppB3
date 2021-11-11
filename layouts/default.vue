@@ -1,7 +1,9 @@
 <template>
-  <v-app class="section">
+  <v-app class="section" v-if="loaded">
     <v-main>
-      <transition name="slide-fade"><Nuxt /></transition>
+      <transition name="slide-fade">
+        <Nuxt />
+      </transition>
     </v-main>
   </v-app>
 </template>
@@ -10,25 +12,34 @@
 
 import { ACTIONS } from "../store/auth.js";
 export default {
-  mounted() {
-    const user = this.$fireModule.auth().currentUser;
-    if( user != null){
-      this.$cookies.set('uid', user.uid, {
-        path: '/',
-        maxAge: 60 * 60 * 24 * 7
-      });
-      const currentUser = {
-        email: user.email,
-        displayName: user.displayName,
-        photoURL: user.photoURL,
-        uid: user.uid
-      }
-      this.$store.dispatch(ACTIONS.LOGIN, currentUser);
-    }else{
-      this.$cookies.remove('uid');
+  data() {
+    return {
+      loaded: false
     }
-    
-  }
+  },
+  async created() {
+    this.$fire.auth.onAuthStateChanged(async () => {
+      const user = this.$fire.auth.currentUser;
+      if (user) {
+        this.$cookies.set('uid', user.uid, {
+          path: '/',
+          maxAge: 60 * 60 * 24 * 7
+        });
+        const currentUser = {
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+          uid: user.uid
+        }
+        await this.$store.dispatch('auth/login', currentUser).then(
+          r => this.loaded = true,
+          err => this.loaded = true
+        )
+      } else {
+        this.$cookies.remove('uid');
+      }
+    })
+  },
 }
 
 </script>

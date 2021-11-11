@@ -23,8 +23,8 @@ export const mutations = {
         state.user.parameters.planetNames = false,
         state.login = false
     },
-  UPDATE_USER_PARAMS: (state, name, value) => {
-    state.user.parameters[name] = value;
+  UPDATE_USER_PARAMS: (state, data) => {
+    state.user.parameters[data.name] = data.value;
   }
 }
 
@@ -70,6 +70,6 @@ export const actions = {
       await this.$fire.firestore.collection("users")
         .doc(this.state.auth.user.uid)
         .update(params);
-      commit("UPDATE_USER_PARAMS", data.name, data.value)
+      commit("UPDATE_USER_PARAMS", data)
   }
 }

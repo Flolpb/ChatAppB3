@@ -84,7 +84,7 @@ export default {
     this.loading = false;
   },
   destroyed() {
-    clearInterval(this.cyclicRedraw)
+    this.cyclicRedraw && (clearInterval(this.cyclicRedraw));
   },
   methods: {
     async logout() {
@@ -113,24 +113,29 @@ export default {
     },
     launchDrawing() {
       let ctx = this.$refs.canvas.getContext('2d');
-      this.cyclicRedraw = setInterval(() => {
-        ctx.clearRect(0, 0, this.canvasData.width, this.canvasData.height);
-        if (!this.ellipses.length) {
-          this.drawPlanets();
-        } else {
-          this.ellipses.map((ellipse) => {
-            ellipse.rings = ellipse.rings.map((e) => {
-              // On ajoute une valeur à la rotation en fonction de la vitesse pour faire tourner les anneaux
-              return {
-                color: e.color,
-                rot: e.rot += e.celerity * 0.001,
-                lineWidth: e.lineWidth,
-                celerity: e.celerity,
-              }});
-            this.generatePlanet(ellipse);
-          });
-        }
-      }, 1000/this.FPS)
+      // Condition si l'utilisateur a choisi d'afficher les animations
+      if (this.$store.state.auth.user.parameters.animation) {
+        this.cyclicRedraw = setInterval(() => {
+          ctx.clearRect(0, 0, this.canvasData.width, this.canvasData.height);
+          if (!this.ellipses.length) {
+            this.drawPlanets();
+          } else {
+            this.ellipses.map((ellipse) => {
+              ellipse.rings = ellipse.rings.map((e) => {
+                // On ajoute une valeur à la rotation en fonction de la vitesse pour faire tourner les anneaux
+                return {
+                  color: e.color,
+                  rot: e.rot += e.celerity * 0.001,
+                  lineWidth: e.lineWidth,
+                  celerity: e.celerity,
+                }});
+              this.generatePlanet(ellipse);
+            });
+          }
+        }, 1000/this.FPS)
+      } else {
+        this.drawPlanets();
+      }
     },
     // Fonction de dessin de toutes les planètes
     drawPlanets() {
@@ -168,7 +173,6 @@ export default {
       }
     },
     // Fonction de dessin d'une planète (ellipse ronde)
-    // @param color => utile lors de la mise à jour de la planète pour garder la même couleur à chaque frame
     drawMainEllipse(ellipse) {
       let ctx = this.$refs.canvas.getContext('2d');
       ctx.beginPath();
@@ -222,7 +226,8 @@ export default {
     generatePlanet(ellipse) {
       // Dessine la partie principale de la planète
       this.drawMainEllipse(ellipse);
-      this.drawPlanetName(ellipse);
+      // Condition si l'utilisateur a choisi d'afficher les noms de planète
+      this.$store.state.auth.user.parameters.planetNames && (this.drawPlanetName(ellipse));
       ellipse.rings.map((ring) => this.drawRing(ellipse, ring))
     },
   },
