@@ -20,8 +20,8 @@
         </div>
 
         <CustomTitle :title="'Paramètres'" :fontSize="3" :marginBottom="1" />
-        <CustomSwitch v-if="loaded" :name="'animation'" :initial-value="animation" @update="onSwitchUpdate" :label="'Animations activées'" />
-        <CustomSwitch v-if="loaded" :name="'planetNames'" :initial-value="planetNames" @update="onSwitchUpdate" :label="'Nom des planètes affichées'" />
+        <CustomSwitch :name="'animation'" :label="'Animations activées'" :initial-value="animation ? animation : this.$store.state.auth.user.parameters.animation" @update="onSwitchUpdate" />
+        <CustomSwitch :name="'planetNames'" :label="'Nom des planètes affichées'" :initial-value="planetNames ? planetNames : this.$store.state.auth.user.parameters.planetNames" @update="onSwitchUpdate" />
 
         <h2>Liste Des planètes de l'utilisateur</h2>
         <div v-for="(p, i) in planets"
@@ -43,16 +43,12 @@ export default {
   components: {BackArrow, CustomSwitch},
   middleware: 'disconnect',
   data: () => ({
-    animation: null,
-    planetNames: null,
     planets: null,
-    loaded: false,
+    animation: null,
+    planetNames: null
   }),
-  mounted() {
-    this.getUserPlanets();
-    this.animation = this.$store.state.auth.user.parameters.animation;
-    this.planetNames = this.$store.state.auth.user.parameters.planetNames;
-    this.loaded = true;
+  async mounted() {
+    await this.getUserPlanets();
   },
   methods: {
     async getUserPlanets() {
@@ -64,7 +60,7 @@ export default {
       }else{
         this.user = this.$store.state.auth.user.uid;
         setTimeout(() => {
-          this.getData();
+          this.getUserPlanets();
         }, 100);
       }
     },
@@ -73,18 +69,12 @@ export default {
       this.$router.push('/login');
     },
     // Mise à jour des paramètres depuis les switchs
-    onSwitchUpdate(name, newValue) {
-      console.log("test")
-      this[name] = newValue;
-      this.$store.dispatch(ACTIONS.UPDATE_USER_PARAMS,
-        {
-          parameters:
-            {
-              animation: this.animation,
-              planetNames: this.planetNames,
-            }
-        }
-      );
+    onSwitchUpdate(name, value) {
+      this[name] = value;
+      this.$store.dispatch(ACTIONS.UPDATE_USER_PARAMS, {
+        name: name,
+        value: value
+      });
     },
     redirect() {
       this.$router.push('/planets')

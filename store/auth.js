@@ -23,8 +23,8 @@ export const mutations = {
         state.user.parameters.planetNames = false,
         state.login = false
     },
-  UPDATE_USER_PARAMS: (state, parameters) => {
-    state.user.parameters = parameters;
+  UPDATE_USER_PARAMS: (state, name, value) => {
+    state.user.parameters[name] = value;
   }
 }
 
@@ -40,7 +40,7 @@ export const actions = {
       const snapshot = await userRef.get();
       let data = snapshot.data();
 
-      if (data.parameters) {
+      if (data && data.parameters) {
         user.parameters = data.parameters
       } else {
         user.parameters = {
@@ -64,10 +64,12 @@ export const actions = {
       this.$cookies.remove('uid');
       commit("LOGOUT");
     },
-    async updateUserParams({commit}, parameters) {
+    async updateUserParams({commit}, data) {
+      let params = {};
+      params[`parameters.${data.name}`] = data.value;
       await this.$fire.firestore.collection("users")
         .doc(this.state.auth.user.uid)
-        .update(parameters);
-      commit("UPDATE_USER_PARAMS", parameters)
+        .update(params);
+      commit("UPDATE_USER_PARAMS", data.name, data.value)
   }
 }

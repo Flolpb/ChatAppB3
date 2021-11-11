@@ -36,6 +36,7 @@ export default {
     GLOBAL_PLANET_RADIUS: 0,
     CANVAS_MARGIN_X: 0,
     FPS: 0,
+    loading: true,
   }),
   async mounted() {
     // Récupération des planètes
@@ -61,7 +62,6 @@ export default {
       { title: 'Nouvelle planète', route:'/planets/create', class_color: 'blue--text' },
       { title: 'Profil', route:'/profile' },
       { title: 'Amis', route:'/friends' },
-      { title: 'Paramètres', route:'/parameter' },
       { title: 'Se déconnecter', click: () => this.logout(), class_color: 'red--text'}
     ];
 
@@ -81,6 +81,7 @@ export default {
       mousedPlanet ? canvas.classList.add('canvas-cursor') : canvas.classList.remove('canvas-cursor');
     });
 
+    this.loading = false;
   },
   destroyed() {
     clearInterval(this.cyclicRedraw)

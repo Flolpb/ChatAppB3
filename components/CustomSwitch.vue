@@ -6,7 +6,6 @@
     <v-row class="sub-row" align="center">
       <v-switch
         v-model="value"
-        @change="onChange"
         inset
       ></v-switch>
       <p class="custom-text">{{ label }}</p>
@@ -18,19 +17,16 @@
 export default {
   name: "CustomSwitch",
   props: ['name', 'initialValue', 'label'],
-  data() {
-    return {
-      value: this.initialValue
+  computed: {
+    value: {
+      get() {
+        return this.initialValue
+      },
+      set(value) {
+        this.$emit('update', this.name, value)
+      }
     }
   },
-  mounted() {
-    this.value = this.initialValue
-  },
-  methods: {
-    onChange() {
-      this.$emit('update', this.name, this.value)
-    }
-  }
 }
 </script>
 
