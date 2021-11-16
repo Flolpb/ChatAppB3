@@ -15,6 +15,7 @@
         <div class="chat">
             <div class="d-flex justify-space-between" width="100%">
                 <div class="d-flex justify-center" style="margin-left: 2rem;">
+                    <!--Flèche retour à la liste des planètes.-->
                     <v-tooltip bottom>
                         <template v-slot:activator="{ on, attrs }">
                             <v-icon
@@ -27,6 +28,7 @@
                             >mdi-keyboard-backspace
                             </v-icon>
                         </template>
+                        <!--Tool Tip for the icon-->
                         <span>Retour à la page planète</span>
                     </v-tooltip>
                 </div>
@@ -41,7 +43,7 @@
             </div>
             <div id="content">
                 <ul id="scrollableContent" v-if="messages.length">
-                    <div id="isUp"></div>
+                    <div style="height: 2rem;" id="isUp"></div>
                     <li v-for="(m) in messages"
                     :key="m.id"
                     exact>

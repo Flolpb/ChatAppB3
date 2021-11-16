@@ -32,6 +32,7 @@ export default {
     methods: {
       async getData(){
         if(this.uid != null){
+          // On récupère l'Utilisateur si celui-ci existe.
           const userRef = await this.$fire.firestore.collection("users").doc(this.uid);
           const snapshot = await userRef.get();
           const doc = snapshot.data();

@@ -18,24 +18,32 @@ export default {
     }
   },
   async created() {
+    // lorsque l'utilisateur change de statut de connexion :
     this.$fire.auth.onAuthStateChanged(async () => {
+      // On définit l'utilisateur en fonction de son authentification dans la base de donnée.
       const user = this.$fire.auth.currentUser;
+      // Si il existe un user :
       if (user) {
         this.$cookies.set('uid', user.uid, {
           path: '/',
+          // On garde le cookie pendant une semaine:
           maxAge: 60 * 60 * 24 * 7
         });
+        //On définit le user actuel avec le user que l'on a récupéré précédemment.
         const currentUser = {
           email: user.email,
           displayName: user.displayName,
           photoURL: user.photoURL,
           uid: user.uid
         }
+
+        //On met le user dans le store.
         await this.$store.dispatch('auth/login', currentUser).then(
           r => this.loaded = true,
           err => this.loaded = true
         )
       } else {
+        // si le user n'est pas connecté =>on remove le cookie
         this.$cookies.remove('uid');
       }
     })

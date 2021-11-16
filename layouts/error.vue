@@ -23,7 +23,7 @@ export default {
   },
   data () {
     return {
-      pageNotFound: '404 Not Found',
+      pageNotFound: 'Vous vous êtes égarés dans l\'espace 404',
       otherError: 'An error occurred'
     }
   },

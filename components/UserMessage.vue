@@ -96,13 +96,18 @@ export default {
         }, 100)
       },
       async getData(){
+        //On récupère l'utilisateur qui a envoyé le message
         const userRef = await this.$fire.firestore.collection("users").doc(this.uid);
         const snapshot = await userRef.get();
         const doc = snapshot.data();
         if(doc != null){
+          //si il y a un utilisateur ( ce qui est normalement censé tjrs être le cas ) 
           this.username = doc.displayName;
           this.photoUrl = doc.photoURL;
+        }else{
+          this.username = "error";
         }
+        //On reformate la date.
         if(this.createdAt != null){
           this.created = new Date(this.createdAt.seconds * 1000);
           this.hours = this.created.getHours();
@@ -129,12 +134,12 @@ export default {
           }
 
           this.date += "/" + this.month;
-          console.log(this.time);
         }
         
       } 
     },
     async mounted () {
+      //On récupère les données d'utilisateur et on reformate l'heure dans une string
       await this.getData();
     },
 
