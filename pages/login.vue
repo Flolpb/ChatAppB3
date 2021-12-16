@@ -8,7 +8,7 @@
         <v-row>
           <v-col cols="12" class="col-right">
             <CustomTitle :title="'Space Chat'" />
-            <p id="text">Space Chat est, comme son nom l'indique, une application de chat par salon, elles-mêmes créées par les utilisateurs ! En effet, chaque utilisateur peut créer sa propre planète avec le nom et le thème de discussion voulu, mais aussi rejoindre une planète étrangère ! Rejoignez-nous sur Space Chat !</p>
+            <p id="text">Space Chat est une application de chat par salons crées par les utilisateurs ! En effet, chaque utilisateur peut créer sa propre planète avec le nom et le thème de discussion voulu, mais aussi rejoindre une planète étrangère ! Rejoignez-nous sur Space Chat !</p>
           </v-col>
           <v-col cols="12" align="center">
             <v-progress-circular
