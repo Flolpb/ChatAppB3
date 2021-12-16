@@ -37,6 +37,11 @@
           </v-autocomplete>
         </v-flex>
       </v-form>
+      <v-progress-circular
+            v-if="spinner"
+            color="#272753"
+          ></v-progress-circular>
+      <CustomButton v-else :title="'Ajouter des amis'" :button-click="addFriends"/>
     <div>
       <v-card
         elevation="12"
@@ -69,6 +74,8 @@
     data: () => ({
       friends: [],
       search: [],
+      userRef: null,
+      spinner: false,
     }),
     methods: {
       home () {
@@ -100,12 +107,12 @@
 
       async getFriends(){
         console.log("debut getFriends")
-        const userRef = await this.$fire.firestore.collection("users").doc(this.$store.state.auth.user.uid);
-        const snap = await userRef.get();
+        const snap = await this.userRef.get();
         const data = snap.data();
           if(data != null){
             let i = this.friends.length;
-            if (data.friends != undefined){
+            if (data.friends != null){
+            console.log(data.friends)
             data.friends.forEach((fr) => {
               if (i != 0){
                 const id = this.friends.find((f) => {
@@ -116,7 +123,7 @@
                   i++;
                 }
                 }else{
-                  this.friends.push(user);
+                  this.friends.push(fr);
                   i++;
               }
             })                
@@ -126,13 +133,28 @@
       async addFriends(){
             this.spinner = true;
             try {
-              
+              this.search.forEach(friend => {
+                console.log(friend);
+                const value={
+                  friendvalue:{
+                    displayName: friend.displayName,
+                    photoURL: friend.photoURL
+                  }
+                }   
+                console.log(value)
+                const data={
+                  friends:[value]
+                }
+                  console.log(data)
+                  const unionRes = this.userRef.update(arrayUnion(data));
+              })
             } catch (e) {
              this.spinner = false;
             }
           },
     },
         async mounted() {
+          this.userRef = this.$fire.firestore.collection("users").doc(this.$store.state.auth.user.uid);
           await this.getFriends();
           await this.getSearch();
         }
