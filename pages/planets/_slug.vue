@@ -43,6 +43,7 @@
             </div>
             <div id="content">
                 <ul id="scrollableContent" v-if="messages.length">
+                    <div style="height: 5rem;"></div>
                     <div style="height: 2rem;" id="isUp"></div>
                     <li v-for="(m) in messages"
                     :key="m.id"
@@ -58,8 +59,8 @@
             </div>
 
 
-            <v-form ref="form" lazy-validation>
-                <v-textarea
+            <v-form ref="form" lazy-validation @submit.prevent="sendMessage">
+                <v-text-field
                     style="margin-left: 2rem;"
                     rows="1"
                     v-model="message.text"
@@ -70,7 +71,7 @@
                     type="text"
                     @click:append-outer="sendMessage"
                     @click:clear="clearMessage"
-                ></v-textarea>
+                ></v-text-field>
             </v-form>
         </div>
         <div></div>
@@ -116,7 +117,7 @@ export default {
         //test if the data is loading
         loading: true,
         //the nb of messages loaded
-        messagesLoaded: 10,
+        messagesLoaded: 15,
         loadOnce: false,
         //if the user is scrolling, dont scroll to bottom
         canScroll: true,
@@ -292,6 +293,10 @@ export default {
         //When scrolling at the scroll block msg, if the user go to the top => load more messages
         onScrollEvent(){
             if(this.isScrolledIntoView() && this.canScroll){
+                const el = this.$el.querySelector("#scrollableContent");
+                if (el) {
+                    el.scrollTop = 100;
+                }
                 this.messagesLoaded += 10;
                 this.canScroll = false;
                 this.getMessages();
