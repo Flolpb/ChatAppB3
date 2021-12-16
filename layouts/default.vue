@@ -43,6 +43,7 @@ export default {
           err => this.loaded = true
         )
       } else {
+        this.loaded = true;
         // si le user n'est pas connecté =>on remove le cookie
         this.$cookies.remove('uid');
       }
