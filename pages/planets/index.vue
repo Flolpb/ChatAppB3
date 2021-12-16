@@ -8,11 +8,14 @@
         :width="10"
       ></v-progress-circular>
     </div>
+    <div v-if="!nbPages" class="d-flex justify-center align-center" style="min-height: 100vh">
+      <v-btn @click="$router.push('/planets/create')">Créer une planète</v-btn>
+    </div>
     <div style="position: fixed; left: 1em; bottom: 1em">
       <v-btn v-if="page !== 1" @click="switchPage(false)">
         Précédent
       </v-btn>
-      <v-btn v-if="page !== nbPages" @click="switchPage">
+      <v-btn v-if="nbPages && page !== nbPages" @click="switchPage">
         Suivant
       </v-btn>
     </div>
