@@ -40,8 +40,7 @@ export const actions = {
   },
   async getNextPlanets({commit}){
     let snap = await this.$fire.firestore.collection("planets").orderBy("id");
-    let lastSnap = await snap.startAfter(this.state.planets.planets[this.state.planets.planets.length - 1].id);
-    let planets = await lastSnap.limit(25).get().then(
+    let planets = await snap.startAfter(this.state.planets.planets[this.state.planets.planets.length - 1].id).limit(25).get().then(
       (r) => r.docs.map(doc => doc.data())
     );
     let data = {

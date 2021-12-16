@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <div v-if="loading" class="d-flex justify-center" style="margin-top: 40vh; transform: translateY(-50%);" >
+  <div id="main-div">
+    <div v-if="loading" class="d-flex justify-center align-center" style="min-height: 100vh">
       <v-progress-circular
         indeterminate
         color="#ede3e8"
@@ -8,13 +8,15 @@
         :width="10"
       ></v-progress-circular>
     </div>
+    <div style="position: fixed; left: 1em; bottom: 1em">
+      <v-btn v-if="page !== 1" @click="switchPage(false)">
+        Précédent
+      </v-btn>
+      <v-btn v-if="page !== nbPages" @click="switchPage">
+        Suivant
+      </v-btn>
+    </div>
     <div class="text-center">
-      <v-btn v-if="page != 1" @click="beforePage">
-        before Page
-      </v-btn>
-      <v-btn v-if="page != nbPages" @click="nextPage">
-        Next Page
-      </v-btn>
       <SidebarMenu v-if="!loading" :items="sidebarItems"/>
       <canvas class="text-center" ref="canvas" id="canvas"></canvas>
     </div>
@@ -95,44 +97,40 @@ export default {
     this.cyclicRedraw && (clearInterval(this.cyclicRedraw));
   },
   methods: {
-    async nextPage(){
-      await this.$store.dispatch(ACTIONS_PLANET.GET_NEXT_PLANETS);
-        // Copie du tableau enregistré dans le state
+    async switchPage(next = true){
+      let div = document.getElementById('main-div');
+      div.scrollTop = 0;
+      div.style.overflow = "hidden";
+      this.loading = true;
+      if (next) {
+        await this.$store.dispatch(ACTIONS_PLANET.GET_NEXT_PLANETS).then(
+          r => {
+            this.loading = false;
+            this.page++;
+          },
+          err => {
+            this.loading = true;
+            this.page++;
+          }
+        );
+      } else {
+        await this.$store.dispatch(ACTIONS_PLANET.GET_BEFORE_PLANETS).then(
+          r => {
+            this.loading = false;
+            this.page--;
+          },
+          err => {
+            this.loading = true;
+            this.page--;
+          }
+        );
+      }
+      // On vide les anciennes planètes
+      this.ellipses = [];
+      // Copie du tableau enregistré dans le state
       this.planets = JSON.parse(JSON.stringify(this.$store.state.planets.planets));
       this.updateCanvasHeight();
-      this.page++;
-
-      // Ajout d'un évènement onClick sur le canvas pour entrer dans une planète
-      this.$refs.canvas.addEventListener('click', (e) => {
-        let clickedPlanet = this.ellipses.find((ellipse) => checkInCircle(e.offsetX, e.offsetY, ellipse.x, ellipse.y, this.RING_RADIUS_X));
-        clickedPlanet && (this.redirectToPlanet(clickedPlanet.id))
-      });
-
-      this.$refs.canvas.addEventListener('mousemove', (e) => {
-        let mousedPlanet = this.ellipses.find((ellipse) => checkInCircle(e.offsetX, e.offsetY, ellipse.x, ellipse.y, this.RING_RADIUS_X));
-        let canvas = document.getElementById('canvas');
-        mousedPlanet ? canvas.classList.add('canvas-cursor') : canvas.classList.remove('canvas-cursor');
-      });
-    },
-    async beforePage(){
-
-      await this.$store.dispatch(ACTIONS_PLANET.GET_BEFORE_PLANETS);
-      this.page--;
-        // Copie du tableau enregistré dans le state
-      this.planets = JSON.parse(JSON.stringify(this.$store.state.planets.planets));
-      this.updateCanvasHeight();
-
-      // Ajout d'un évènement onClick sur le canvas pour entrer dans une planète
-      this.$refs.canvas.addEventListener('click', (e) => {
-        let clickedPlanet = this.ellipses.find((ellipse) => checkInCircle(e.offsetX, e.offsetY, ellipse.x, ellipse.y, this.RING_RADIUS_X));
-        clickedPlanet && (this.redirectToPlanet(clickedPlanet.id))
-      });
-
-      this.$refs.canvas.addEventListener('mousemove', (e) => {
-        let mousedPlanet = this.ellipses.find((ellipse) => checkInCircle(e.offsetX, e.offsetY, ellipse.x, ellipse.y, this.RING_RADIUS_X));
-        let canvas = document.getElementById('canvas');
-        mousedPlanet ? canvas.classList.add('canvas-cursor') : canvas.classList.remove('canvas-cursor');
-      });
+      div.style.overflow = "visible";
     },
     async logout() {
       this.$store.dispatch(ACTIONS_AUTH.LOGOUT);
