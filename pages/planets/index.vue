@@ -71,7 +71,6 @@ export default {
     this.sidebarItems = [
       { title: 'Nouvelle planète', route:'/planets/create', class_color: 'blue--text' },
       { title: 'Profil', route:'/profile' },
-      { title: 'Amis', route:'/friends' },
       { title: 'Se déconnecter', click: () => this.logout(), class_color: 'red--text'}
     ];
 

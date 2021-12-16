@@ -23,12 +23,6 @@
         <CustomSwitch :name="'animation'" :label="'Animations activées'" :initial-value="animation" @update="onSwitchUpdate" />
         <CustomSwitch :name="'planetNames'" :label="'Nom des planètes affichées'" :initial-value="planetNames" @update="onSwitchUpdate" />
 
-        <h2>Liste Des planètes de l'utilisateur</h2>
-        <div v-for="(p, i) in planets"
-             :key="i"
-             exact>
-          <UserPlanet :planetId="p" />
-        </div>
       </v-col>
     </v-row>
   </v-container>
