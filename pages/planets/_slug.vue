@@ -1,5 +1,5 @@
 <template>
-<div>
+<div id="planetConnect">
     <!--If datas are loading -> show a circular progress-->
     <div v-if="loading" 
     class="d-flex justify-center" style="margin-top: 40vh; transform: translateY(-50%);" >
@@ -22,7 +22,7 @@
                                 v-bind="attrs"
                                 v-on="on"
                                 id="icon"
-                                @click="() => $router.push('/planets')"
+                                @click="() => {addUserConnected('away'); $router.push('/planets');}"
                                 color="white"
                                 size="80"
                             >mdi-keyboard-backspace
@@ -290,6 +290,11 @@ export default {
                 }, 1000);
             }
         },
+        async putConnectEvent(){
+            window.addEventListener("beforeunload", () => {this.addEventListener("away")});
+            window.addEventListener('blur', () => {this.addUserConnected("away")});
+            window.addEventListener('focus', () => {this.addUserConnected("connected")});
+        },
         //When scrolling at the scroll block msg, if the user go to the top => load more messages
         onScrollEvent(){
             if(this.isScrolledIntoView() && this.canScroll){
@@ -358,13 +363,12 @@ export default {
         //on met l'id de l'user avec le user enregistré sur le store
         this.message.userId = this.$store.state.auth.user.uid;
         await this.getUserConnected().then(() => {
-            window.addEventListener('blur', () => {this.addUserConnected("away")});
-            window.addEventListener('focus', () => {this.addUserConnected("connected")});
             this.addUserConnected("connected");
             //loading bar set to false
-            this.loading = false;
         });
+        await this.putConnectEvent();
         await this.putScrollEvent();
+        this.loading = false;
     },
     //if the DOM is updated
     updated(){

@@ -2,8 +2,7 @@
     <div class="d-flex justify-space-start">
         <div style="position: relative">
           <img style="margin-top: 0.5rem;border-radius: 50%; height: 2rem;" :src="photoUrl" />
-          <span class="dot-gray" v-if="status == 'disconnected'"></span>
-          <span class="dot-orange" v-if="status == 'away'"></span>
+          <span class="dot-gray" v-if="status == 'away'"><span class="little-dot-gray"></span></span>
           <span class="dot-green" v-if="status == 'connected'"></span>
         </div>
         <span class="username">{{username}}</span>
@@ -50,10 +49,20 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+.little-dot-gray{
+  height: 0.4rem;
+  width: 0.4rem;
+  background-color: rgb(54, 54, 54);
+  border-radius: 50%;
+  position: absolute;
+  left: 0.15rem;
+  top: 0.15rem;
+}
   .dot-gray {
-  height: 0.2rem;
-  width: 0.2rem;
-  background-color: #bbb;
+  height: 0.8rem;
+  width: 0.8rem;
+  background-color: rgb(83, 83, 83);
+  border: solid 1px rgb(54, 54, 54);
   border-radius: 50%;
   position: absolute;
   left: 1.3rem;
