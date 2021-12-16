@@ -7,8 +7,8 @@
       <v-col cols="7">
         <v-row>
           <v-col cols="12" class="col-right">
-            <CustomTitle :title="'Space chat'" />
-            <p id="text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ducimus iusto laboriosam magnam maiores, placeat quasi quis quos rem repellat repellendus? Dolorem explicabo optio placeat provident. </p>
+            <CustomTitle :title="'Space Chat'" />
+            <p id="text">Space Chat est, comme son nom l'indique, une application de chat par salon, elles-mêmes créées par les utilisateurs ! En effet, chaque utilisateur peut créer sa propre planète avec le nom et le thème de discussion voulu, mais aussi rejoindre une planète étrangère ! Rejoignez-nous sur Space Chat !</p>
           </v-col>
           <v-col cols="12" align="center">
             <v-progress-circular
@@ -36,6 +36,9 @@ export default {
   data: () => ({
     spinner: false,
   }),
+  mounted() {
+    document.title = "Connexion"
+  },
   methods: {
     async login(){
       this.spinner = true;
